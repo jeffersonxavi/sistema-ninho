@@ -10,22 +10,29 @@ return new class extends Migration
     {
         Schema::create('pagamentos', function (Blueprint $table) {
             $table->id();
-            
-            // Vínculo com Aluno
-            $table->foreignId('aluno_id')->constrained('alunos')->onDelete('cascade');
 
+            // Vínculo
+            $table->foreignId('aluno_id')->constrained('alunos')->onDelete('cascade');
+            
             // Detalhes da Parcela
-            $table->unsignedInteger('parcela_numero');
+            $table->unsignedSmallInteger('parcela_numero');
             $table->decimal('valor_previsto', 10, 2);
             $table->date('data_vencimento');
-            $table->enum('status', ['Pendente', 'Pago', 'Atrasado', 'Cancelado'])->default('Pendente');
+            $table->string('status', 50)->default('Pendente'); 
 
-            // Detalhes do Pagamento
-            $table->decimal('valor_pago', 10, 2)->nullable();
+            // Detalhes do Pagamento (se pago)
             $table->date('data_pagamento')->nullable();
-            $table->foreignId('registrado_por_user_id')->nullable()->constrained('users'); // Quem deu a baixa
+            $table->decimal('valor_pago', 10, 2)->nullable();
+            $table->string('metodo_pagamento', 50)->nullable();
+            $table->text('observacoes')->nullable();
+
+            // Controle de Usuário
+            $table->foreignId('registrado_por_user_id')->constrained('users');
 
             $table->timestamps();
+            
+            // Chave única para garantir que um aluno não tenha duas parcelas com o mesmo número
+            $table->unique(['aluno_id', 'parcela_numero']);
         });
     }
 

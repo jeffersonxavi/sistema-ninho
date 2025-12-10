@@ -37,6 +37,12 @@
                        <x-nav-link :href="route('admin.turmas.index')" :active="request()->routeIs('admin.turmas.*')">
                             {{ __('Turmas') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.alunos.index')" :active="request()->routeIs('admin.alunos.*')">
+                            {{ __('Alunos') }}
+                        </x-nav-link>
+                         <x-nav-link :href="route('admin.pagamentos.index')" :active="request()->routeIs('admin.pagamentos.*')">
+                            {{ __('Pagamentos') }}
+                        </x-nav-link>
 
                     @endif
                     {{-- ---------------------------------------------------------------- --}}

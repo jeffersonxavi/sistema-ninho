@@ -10,33 +10,33 @@ class Pagamento extends Model
 {
     use HasFactory;
 
+    protected $table = 'pagamentos';
+
+    protected $casts = [
+        'data_vencimento' => 'date',
+        'data_pagamento' => 'date',
+        'valor_pago' => 'decimal:2',
+    ];
+
     protected $fillable = [
         'aluno_id',
         'parcela_numero',
         'valor_previsto',
         'data_vencimento',
-        'status',
-        'valor_pago',
+        'status', // Ex: Pendente, Pago, Atrasado, Cancelado
         'data_pagamento',
+        'valor_pago',
+        'metodo_pagamento', // Ex: Pix, Boleto, Cartão
+        'observacoes',
         'registrado_por_user_id',
     ];
 
-    protected $casts = [
-        'data_vencimento' => 'date',
-        'data_pagamento' => 'date',
-    ];
-
-    /**
-     * Relacionamento: O Pagamento pertence a um Aluno (FK: aluno_id).
-     */
+    // Relacionamentos
     public function aluno(): BelongsTo
     {
         return $this->belongsTo(Aluno::class);
     }
 
-    /**
-     * Relacionamento: Quem registrou a baixa do pagamento (Staff/Admin).
-     */
     public function registradoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'registrado_por_user_id');

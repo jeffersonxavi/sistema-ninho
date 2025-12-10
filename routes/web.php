@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\PagamentoController;
+use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfessorController;
 use App\Http\Controllers\SalaController;
@@ -36,6 +38,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::resource('turmas', TurmaController::class)->parameters([
         'turmas' => 'turma'
+    ]);
+    Route::resource('alunos', AlunoController::class)->parameters([
+        'alunos' => 'aluno'
+    ]);
+    Route::resource('pagamentos', PagamentoController::class)->parameters([
+        'pagamentos' => 'pagamento'
     ]);
         // TODO: Adicionar Rotas para Salas e Turmas aqui
 
