@@ -45,6 +45,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('pagamentos', PagamentoController::class)->parameters([
         'pagamentos' => 'pagamento'
     ]);
+    // Rota específica para gerar/download do Contrato PDF
+    Route::get('alunos/{aluno}/contrato/download', [App\Http\Controllers\AlunoController::class, 'downloadContrato'])->name('alunos.contrato.download');
         // TODO: Adicionar Rotas para Salas e Turmas aqui
 
     });

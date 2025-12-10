@@ -19,6 +19,17 @@
                             Ficha Completa
                         </h3>
                         <div class="flex space-x-3">
+                            
+                            {{-- 🚨 NOVO BOTÃO DE VISUALIZAR CONTRATO 🚨 --}}
+                            <a href="{{ route('admin.alunos.contrato.download', $aluno->id) }}" 
+                               class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-sm transition duration-150 flex items-center"
+                               target="_blank" {{-- Abre em nova aba --}}
+                               title="Visualizar Contrato em PDF">
+                                <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                Contrato PDF
+                            </a>
+                            {{-- FIM NOVO BOTÃO --}}
+
                             <a href="{{ route('admin.alunos.edit', $aluno->id) }}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md shadow-sm transition duration-150">
                                 Editar Dados
                             </a>
@@ -140,9 +151,9 @@
                             </table>
                         </div>
                     @endif
-
                 </div>
             </div>
         </div>
     </div>
+    
 @endsection

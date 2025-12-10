@@ -17,11 +17,10 @@ class Turma extends Model
         'cadastrado_por_user_id',
     ];
 
-    public function professores()
-    {
-        return $this->belongsToMany(Professor::class, 'turma_professor', 'turma_id', 'professor_id');
-    }
-
+public function professores()
+{
+    return $this->belongsToMany(Professor::class, 'turma_professor', 'turma_id', 'professor_id');
+}
     /**
      * Relacionamento: Uma Turma pertence a uma Sala (FK: sala_id).
      */
