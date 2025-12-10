@@ -29,13 +29,14 @@
                             {{ __('Professores') }}
                         </x-nav-link>
                         
-                        {{-- Futuros links: Salas e Turmas --}}
-                        {{-- <x-nav-link :href="route('admin.salas.index')" :active="request()->routeIs('admin.salas.*')">
+                        
+                         <x-nav-link :href="route('admin.salas.index')" :active="request()->routeIs('admin.salas.*')">
                             {{ __('Salas') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('admin.turmas.index')" :active="request()->routeIs('admin.turmas.*')">
+                       
+                       <x-nav-link :href="route('admin.turmas.index')" :active="request()->routeIs('admin.turmas.*')">
                             {{ __('Turmas') }}
-                        </x-nav-link> --}}
+                        </x-nav-link>
 
                     @endif
                     {{-- ---------------------------------------------------------------- --}}

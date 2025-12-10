@@ -13,17 +13,13 @@ class Turma extends Model
 
     protected $fillable = [
         'nome',
-        'professor_id',
         'sala_id',
         'cadastrado_por_user_id',
     ];
 
-    /**
-     * Relacionamento: Uma Turma pertence a um Professor (FK: professor_id).
-     */
-    public function professor(): BelongsTo
+    public function professores()
     {
-        return $this->belongsTo(Professor::class);
+        return $this->belongsToMany(Professor::class, 'turma_professor', 'turma_id', 'professor_id');
     }
 
     /**

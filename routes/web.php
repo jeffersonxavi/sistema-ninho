@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfessorController;
+use App\Http\Controllers\SalaController;
+use App\Http\Controllers\TurmaController;
 use App\Http\Middleware\IsAdmin;           // IMPORTADO
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +30,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         'professores' => 'professor'
     ]);
 
+    Route::resource('salas', SalaController::class)->parameters([
+        'salas' => 'sala'
+    ]);
+
+    Route::resource('turmas', TurmaController::class)->parameters([
+        'turmas' => 'turma'
+    ]);
         // TODO: Adicionar Rotas para Salas e Turmas aqui
 
     });

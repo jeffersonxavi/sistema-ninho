@@ -19,15 +19,17 @@ class Sala extends Model
     /**
      * Relacionamento: Uma Sala pode ser usada por muitas Turmas.
      */
-    public function turmas(): HasMany
+      public function professores()
+    {
+        return $this->belongsToMany(Professor::class, 'professor_sala');
+    }
+
+    public function turmas()
     {
         return $this->hasMany(Turma::class);
     }
 
-    /**
-     * Relacionamento: Sala foi cadastrada por um usuário (Admin).
-     */
-    public function cadastradoPor(): BelongsTo
+    public function cadastradoPor()
     {
         return $this->belongsTo(User::class, 'cadastrado_por_user_id');
     }

@@ -13,7 +13,6 @@ return new class extends Migration
             $table->string('nome', 150);
             
             // Relacionamentos FK
-            $table->foreignId('professor_id')->constrained('professores')->onDelete('cascade');
             $table->foreignId('sala_id')->constrained('salas')->onDelete('cascade');
             $table->foreignId('cadastrado_por_user_id')->constrained('users');
 

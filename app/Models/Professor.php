@@ -18,12 +18,16 @@ class Professor extends Model
         'cadastrado_por_user_id',
     ];
 
-    /**
-     * Relacionamento: Um Professor tem muitas Turmas.
-     */
-    public function turmas(): HasMany
+    // AJUSTADO: Relacionamento N:M com Turmas
+    public function turmas()
     {
-        return $this->hasMany(Turma::class);
+        return $this->belongsToMany(Turma::class, 'professor_turma', 'professor_id', 'turma_id');
+    }
+
+    // RELACIONAMENTO N:M COM SALAS
+    public function salas()
+    {
+        return $this->belongsToMany(Sala::class, 'professor_sala', 'professor_id', 'sala_id');
     }
 
     /**
