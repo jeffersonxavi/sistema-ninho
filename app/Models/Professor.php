@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Professor extends Model
 {
     use HasFactory;
+    protected $table = 'professores'; // força o nome correto da tabela
 
     // Campos que podem ser preenchidos em massa
     protected $fillable = [

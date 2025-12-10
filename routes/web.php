@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ProfessorController; // Importar o Controller
+use App\Http\Controllers\ProfessorController;
+use App\Http\Middleware\IsAdmin;           // IMPORTADO
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,18 +14,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rota padrão do Dashboard
     Route::get('/dashboard', function () {
-        // Redirecionamento condicional pode ser adicionado aqui depois (Admin -> Painel Admin, Staff -> Painel Staff)
         return view('dashboard');
     })->name('dashboard');
     
     // ------------------------------------------------------------------
     // ROTAS ADMINISTRATIVAS (APENAS ADMIN)
-    // Aplica o middleware 'admin' na URI '/admin'
+    // Usamos a classe IsAdmin::class diretamente
     // ------------------------------------------------------------------
-    Route::middleware('admin')->prefix('admin')->name('admin.')->group(function () {
+    Route::middleware([IsAdmin::class])->prefix('admin')->name('admin.')->group(function () {
         
         // CRUD Professores
-        Route::resource('professores', ProfessorController::class);
+    Route::resource('professores', ProfessorController::class)->parameters([
+        'professores' => 'professor'
+    ]);
 
         // TODO: Adicionar Rotas para Salas e Turmas aqui
 
