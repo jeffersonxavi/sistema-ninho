@@ -15,47 +15,87 @@ class PagamentoController extends Controller
      */
     public function index(Request $request)
     {
-        // 1. Inicia a query com os vínculos necessários
-        $query = Pagamento::with(['aluno.turma', 'registradoPor'])
+        // 1. Query base com relacionamentos necessários
+        $baseQuery = Pagamento::with(['aluno.turma', 'registradoPor'])
             ->orderBy('data_vencimento', 'asc');
 
-        // Define o status atual da requisição. Padrão: Pendente
+        // Status solicitado (padrão: Pendente)
         $status = $request->get('status', 'Pendente');
 
-        // Calcula a data de hoje à meia-noite para comparações
+        // Data de hoje à meia-noite (para cálculos de atraso)
         $hoje = now()->startOfDay();
 
-        // 2. Aplica o filtro de status de forma condicional
+        // 2. Construir a query filtrada (para listagem e paginação)
+        $query = clone $baseQuery;
+
         if ($status === 'Atrasado') {
-            // Se for "Atrasado", buscamos no DB:
-            // A) O status *real* é 'Pendente'
-            // B) A data de vencimento é *anterior* a hoje
             $query->where('status', 'Pendente')
                 ->where('data_vencimento', '<', $hoje);
         } elseif ($status === 'Pendente') {
-            // Se for "Pendente", buscamos no DB:
-            // A) O status *real* é 'Pendente'
-            // B) A data de vencimento é *maior ou igual* a hoje (ou seja, ainda não venceu)
             $query->where('status', 'Pendente')
                 ->where('data_vencimento', '>=', $hoje);
         } else {
-            // Para 'Pago', 'Cancelado' e outros status fixos
             $query->where('status', $status);
         }
 
-        // Exemplo: filtro por nome do aluno
+        // Filtro por nome do aluno
         if ($request->filled('aluno')) {
             $query->whereHas('aluno', function ($q) use ($request) {
                 $q->where('nome_completo', 'like', '%' . $request->aluno . '%');
             });
         }
 
-        $pagamentos = $query->paginate(20);
+        // Paginação (apenas os registros da página atual)
+        $pagamentos = $query->paginate(20)->appends($request->query());
 
-        // Lista completa de opções para a view
+        // 3. CÁLCULOS DOS TOTAIS CORRETOS (sobre TODOS os registros filtrados, não só a página)
+        $totaisQuery = clone $baseQuery;
+
+        // Aplicar os mesmos filtros de status e aluno usados na listagem
+        if ($status === 'Atrasado') {
+            $totaisQuery->where('status', 'Pendente')
+                ->where('data_vencimento', '<', $hoje);
+        } elseif ($status === 'Pendente') {
+            $totaisQuery->where('status', 'Pendente')
+                ->where('data_vencimento', '>=', $hoje);
+        } else {
+            $totaisQuery->where('status', $status);
+        }
+
+        if ($request->filled('aluno')) {
+            $totaisQuery->whereHas('aluno', function ($q) use ($request) {
+                $q->where('nome_completo', 'like', '%' . $request->aluno . '%');
+            });
+        }
+
+        // Totais corretos
+        $totalPrevisto  = $totaisQuery->sum('valor_previsto');
+        $totalParcelas  = $totaisQuery->count();
+
+        // Valor total em atraso (independente do filtro atual de status)
+        // Calculamos separadamente, pois "Atrasado" é um status virtual
+        $totalAtrasado = (clone $baseQuery)
+            ->where('status', 'Pendente')
+            ->where('data_vencimento', '<', $hoje)
+            ->when($request->filled('aluno'), function ($q) use ($request) {
+                return $q->whereHas('aluno', function ($sub) use ($request) {
+                    $sub->where('nome_completo', 'like', '%' . $request->aluno . '%');
+                });
+            })
+            ->sum('valor_previsto');
+
+        // Opções de filtro
         $status_options = ['Pendente', 'Pago', 'Atrasado', 'Cancelado'];
 
-        return view('admin.pagamentos.index', compact('pagamentos', 'status', 'status_options'));
+        // Passar tudo para a view
+        return view('admin.pagamentos.index', compact(
+            'pagamentos',
+            'status',
+            'status_options',
+            'totalPrevisto',
+            'totalAtrasado',
+            'totalParcelas'
+        ));
     }
 
     /**
