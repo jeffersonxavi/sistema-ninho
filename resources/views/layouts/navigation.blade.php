@@ -13,41 +13,56 @@
                     </a>
                 </div>
 
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
+<div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
 
-                    {{-- ---------------------------------------------------------------- --}}
-                    {{-- LINKS ADMINISTRATIVOS (Admin Only) --}}
-                    {{-- ---------------------------------------------------------------- --}}
-                    @if (Auth::check() && Auth::user()->isAdmin())
-                        
-                        {{-- Link Professores --}}
-                        <x-nav-link :href="route('admin.professores.index')" :active="request()->routeIs('admin.professores.*')">
-                            {{ __('Professores') }}
-                        </x-nav-link>
-                        
-                        
-                         <x-nav-link :href="route('admin.salas.index')" :active="request()->routeIs('admin.salas.*')">
-                            {{ __('Salas') }}
-                        </x-nav-link>
-                       
-                       <x-nav-link :href="route('admin.turmas.index')" :active="request()->routeIs('admin.turmas.*')">
-                            {{ __('Turmas') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.alunos.index')" :active="request()->routeIs('admin.alunos.*')">
-                            {{ __('Alunos') }}
-                        </x-nav-link>
-                         <x-nav-link :href="route('admin.pagamentos.index')" :active="request()->routeIs('admin.pagamentos.*')">
-                            {{ __('Pagamentos') }}
-                        </x-nav-link>
+    {{-- Links exclusivos do ADMIN --}}
+    @if (Auth::user()->isAdmin())
+        <x-nav-link :href="route('admin.professores.index')" 
+            :active="request()->routeIs('admin.professores.*')">
+            Professores
+        </x-nav-link>
 
-                    @endif
-                    {{-- ---------------------------------------------------------------- --}}
-                    
-                </div>
+        <x-nav-link :href="route('admin.salas.index')" 
+            :active="request()->routeIs('admin.salas.*')">
+            Salas
+        </x-nav-link>
+
+        <x-nav-link :href="route('admin.turmas.index')" 
+            :active="request()->routeIs('admin.turmas.*')">
+            Turmas
+        </x-nav-link>
+
+        <x-nav-link :href="route('admin.alunos.index')" 
+            :active="request()->routeIs('admin.alunos.*')">
+            Alunos
+        </x-nav-link>
+
+        <x-nav-link :href="route('admin.pagamentos.index')" 
+            :active="request()->routeIs('admin.pagamentos.*')">
+            Pagamentos
+        </x-nav-link>
+    @endif
+
+    {{-- Links para STAFF (e admin também pode ver se quiser) --}}
+    @if (Auth::user()->isStaff())
+        <x-nav-link :href="route('staff.salas.index')" 
+            :active="request()->routeIs('staff.salas.*')">
+            Salas
+        </x-nav-link>
+
+        <x-nav-link :href="route('staff.alunos.index')" 
+            :active="request()->routeIs('staff.alunos.*')">
+            Alunos
+        </x-nav-link>
+
+        <x-nav-link :href="route('staff.pagamentos.index')" 
+            :active="request()->routeIs('staff.pagamentos.*')">
+            Pagamentos
+        </x-nav-link>
+    @endif
+
+</div>
+
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -95,21 +110,7 @@
 
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
 
-            {{-- ---------------------------------------------------------------- --}}
-            {{-- LINKS ADMINISTRATIVOS RESPONSIVOS (Admin Only) --}}
-            {{-- ---------------------------------------------------------------- --}}
-            @if (Auth::check() && Auth::user()->isAdmin())
-                <x-responsive-nav-link :href="route('admin.professores.index')" :active="request()->routeIs('admin.professores.*')">
-                    {{ __('Professores') }}
-                </x-responsive-nav-link>
-                
-                {{-- Futuros links responsivos... --}}
-            @endif
-            {{-- ---------------------------------------------------------------- --}}
         </div>
 
         <div class="pt-4 pb-1 border-t border-gray-200">
