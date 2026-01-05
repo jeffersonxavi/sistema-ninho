@@ -1,24 +1,31 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Sala;
-use App\Models\Professor; 
+use App\Models\Professor;
+use App\Models\Turma;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class SalaController extends Controller
 {
     
-    /**
-     * Exibe a lista de todas as salas.
-     */
-    public function index()
-    {
-        // Carrega as salas e seus vínculos (professores e turmas) para exibição na tabela.
-        $salas = Sala::with(['cadastradoPor', 'professores', 'turmas'])->latest()->get();
-        return view('admin.salas.index', compact('salas'));
-    }
+public function index()
+{
+    // O Admin vê TODAS as salas e TODAS as turmas
+    $salas = Sala::with(['cadastradoPor', 'professores', 'turmas'])
+                 ->orderBy('id', 'DESC')
+                 ->get();
+
+    $turmas = Turma::with(['professores', 'sala'])
+                   ->orderBy('id', 'DESC')
+                   ->get();
+
+    // A view deve ser 'admin.salas.index' (ou 'admin.salas_turmas.index')
+    return view('admin.salas.index', compact('salas', 'turmas'));
+}
 
     /**
      * Mostra o formulário para criação de uma nova sala.

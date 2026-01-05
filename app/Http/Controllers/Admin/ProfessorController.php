@@ -1,10 +1,13 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Controller;
 use App\Models\Professor;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class ProfessorController extends Controller
 {
@@ -32,19 +35,32 @@ class ProfessorController extends Controller
      * Store a newly created resource in storage.
      * Salva o novo professor no banco de dados
      */
-    public function store(Request $request)
+   public function store(Request $request)
     {
+        // 1. Validação
         $request->validate([
             'nome' => ['required', 'string', 'max:150'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'], // Deve ser único na tabela users
+            'password' => ['required', 'string', 'min:8'],
         ]);
 
+        // 2. Criar a Conta de Usuário (Staff)
+        $user = User::create([
+            'name' => $request->nome, // Usa o nome do professor como nome de usuário
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'staff', // Define o perfil como 'staff'
+        ]);
+
+        // 3. Criar o Professor e vinculá-lo ao novo User
         Professor::create([
             'nome' => $request->nome,
-            'cadastrado_por_user_id' => Auth::id(), // Registra o Admin logado
+            'cadastrado_por_user_id' => Auth::id(), // ID do Admin que cadastrou (conforme regra original)
+            'user_id' => $user->id, // ID do novo Staff (linkando professor e usuário)
         ]);
 
         return redirect()->route('admin.professores.index')
-                         ->with('success', 'Professor cadastrado com sucesso!');
+                         ->with('success', 'Professor e conta de acesso Staff criados com sucesso!');
     }
 
     /**
@@ -64,12 +80,21 @@ class ProfessorController extends Controller
             'nome' => ['required', 'string', 'max:150'],
         ]);
 
+        // Atualiza tabela professores
         $professor->update([
             'nome' => $request->nome,
         ]);
 
-        return redirect()->route('admin.professores.index')
-                         ->with('success', 'Professor atualizado com sucesso!');
+        // Atualiza também o usuário vinculado
+        if ($professor->user) {
+            $professor->user->update([
+                'name' => $request->nome,
+            ]);
+        }
+
+        return redirect()
+            ->route('admin.professores.index')
+            ->with('success', 'Professor atualizado com sucesso!');
     }
 
     /**
