@@ -21,15 +21,16 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
         });
 
-        // ----------------------------------------------------------------------------------
-        // >> CORREÇÃO: REGISTRO DO MIDDLEWARE PERSONALIZADO AQUI
-        // ----------------------------------------------------------------------------------
-        Route::middleware('web')
-            ->alias('admin', \App\Http\Middleware\IsAdmin::class);
-        // ----------------------------------------------------------------------------------
+        Route::aliasMiddleware('admin', \App\Http\Middleware\IsAdmin::class);
+        Route::aliasMiddleware('staff', \App\Http\Middleware\IsStaff::class);
 
         $this->routes(function () {
-            // ... código existente para api.php e web.php ...
+            Route::middleware('api')
+                ->prefix('api')
+                ->group(base_path('routes/api.php'));
+
+            Route::middleware('web')
+                ->group(base_path('routes/web.php'));
         });
     }
 }
