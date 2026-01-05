@@ -38,7 +38,7 @@
                         
                         <div class="mb-6">
                             <label for="professores" class="block text-sm font-medium text-gray-700">Professores Vinculados (Selecione um ou mais) <span class="text-red-500">*</span></label>
-                            <select name="professores[]" id="professores" multiple required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-36">
+                            <select name="professores[]" id="professores" multiple class="mt-1 block w-full rounded-md border-gray-300 shadow-sm h-36">
                                 @if ($professores->isEmpty())
                                     <option disabled>É necessário cadastrar professores.</option>
                                 @else
