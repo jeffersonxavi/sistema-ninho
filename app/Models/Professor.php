@@ -16,12 +16,16 @@ class Professor extends Model
     protected $fillable = [
         'nome',
         'cadastrado_por_user_id',
+        /* 'user_id', */
     ];
 
-    // AJUSTADO: Relacionamento N:M com Turmas
     public function turmas()
     {
-        return $this->belongsToMany(Turma::class, 'professor_turma', 'professor_id', 'turma_id');
+        return $this->belongsToMany(Turma::class, 'turma_professor', 'professor_id', 'turma_id');
+    }
+    public function professores()
+    {
+        return $this->belongsToMany(Professor::class, 'turma_professor', 'turma_id', 'professor_id');
     }
 
     // RELACIONAMENTO N:M COM SALAS
@@ -37,4 +41,11 @@ class Professor extends Model
     {
         return $this->belongsTo(User::class, 'cadastrado_por_user_id');
     }
+    // ...
+    public function user()
+    {
+        // Relacionamento Um para Um (Um Professor pode ser um Usuário)
+        return $this->belongsTo(User::class);
+    }
+    // ...
 }
