@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('professores', function (Blueprint $table) {
             $table->id();
-            $table->string('nome', 150);
+            //Já tem nome no user ao cadastrar professor pelo ADMIN
+            /* $table->string('nome', 150); */
             // Relacionamento (Quem cadastrou - Admin)
             $table->foreignId('cadastrado_por_user_id')->constrained('users');
             $table->timestamps();
