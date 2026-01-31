@@ -16,7 +16,7 @@ class Professor extends Model
     protected $fillable = [
         'nome',
         'cadastrado_por_user_id',
-        /* 'user_id', */
+        'user_id',
     ];
 
     public function turmas()
