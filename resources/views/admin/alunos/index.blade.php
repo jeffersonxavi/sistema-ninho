@@ -34,7 +34,6 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aluno</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Turma/Período</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Matrícula</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status Contrato</th>
                                     {{-- COLUNA ADICIONADA: STATUS FINANCEIRO --}}
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Financeiro</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
@@ -54,19 +53,6 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ \Carbon\Carbon::parse($aluno->data_matricula)->format('d/m/Y') }}
                                         <p class="text-xs text-gray-500">Valor Mensal: R$ {{ number_format($aluno->valor_parcela, 2, ',', '.') }}</p>
-                                    </td>
-                                    
-                                    {{-- COLUNA DE STATUS DO CONTRATO --}}
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        @if ($aluno->contrato_gerado)
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                Gerado
-                                            </span>
-                                        @else
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                                Pendente
-                                            </span>
-                                        @endif
                                     </td>
                                     
                                     {{-- TRECHO A SER SUBSTITUÍDO NA COLUNA "Financeiro" --}}
