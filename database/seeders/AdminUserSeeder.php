@@ -27,7 +27,7 @@ class AdminUserSeeder extends Seeder
         }
 
         // Exemplo de usuário Staff (opcional)
-        if (User::where('email', 'staff@sistemaninho.com')->doesntExist()) {
+        /* if (User::where('email', 'staff@sistemaninho.com')->doesntExist()) {
             User::create([
                 'name' => 'Staff Comum',
                 'email' => 'staff@sistemaninho.com',
@@ -35,6 +35,6 @@ class AdminUserSeeder extends Seeder
                 'role' => 'staff', // Define o papel como 'staff'
             ]);
             $this->command->info('Usuário Staff criado com sucesso!');
-        }
+        } */
     }
 }
