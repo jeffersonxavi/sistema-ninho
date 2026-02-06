@@ -17,8 +17,8 @@ class AdminUserSeeder extends Seeder
         if (User::where('email', 'admin@sistemaninho.com')->doesntExist()) {
             User::create([
                 'name' => 'Administrador Principal',
-                'email' => 'jefingbi2@gmail.com',
-                'password' => Hash::make('almofada'), // Altere 'password' para uma senha forte em produção!
+                'email' => 'jefingbi4@gmail.com',
+                'password' => Hash::make(env('ADMIN_PASSWORD')), // Altere 'password' para uma senha forte em produção!
                 'role' => 'admin', // Define o papel como 'admin'
             ]);
             $this->command->info('Usuário Admin criado com sucesso!');
