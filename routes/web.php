@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Admin\AlunoController as AdminAlunoController;
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\PagamentoController as AdminPagamentoController;
 use App\Http\Controllers\Admin\ProfessorController as AdminProfessorController;
 use App\Http\Controllers\Admin\SalaController as AdminSalaController;
 use App\Http\Controllers\Admin\TurmaController as AdminTurmaController;
 use App\Http\Controllers\AlunoController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SalaController;
 use App\Http\Controllers\Staff\AlunoController as StaffAlunoController;
@@ -17,15 +19,13 @@ use App\Http\Middleware\IsStaff;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard padrão
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // ================================================================
     // OPCIONAL: Mantém o painel /admin/... só para administradores
