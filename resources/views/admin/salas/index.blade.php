@@ -64,7 +64,7 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sala</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Professores e Turmas Lecionadas</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Turmas na Sala</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criado Por</th>
+                                        <!-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Criado Por</th> -->
                                         <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
                                     </tr>
                                 </thead>
@@ -127,9 +127,9 @@
                                             </div>
                                         </td>
 
-                                        <td class="px-6 py-4 text-sm text-gray-700">
+                                        <!-- <td class="px-6 py-4 text-sm text-gray-700">
                                             {{ $sala->cadastradoPor->name ?? '—' }}
-                                        </td>
+                                        </td> -->
 
                                         <td class="px-6 py-4 text-center space-x-4">
                                             <a href="{{ route('admin.salas.edit', $sala) }}" class="text-indigo-600 hover:text-indigo-900 font-medium">Editar</a>

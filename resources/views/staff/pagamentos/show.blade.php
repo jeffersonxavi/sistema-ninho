@@ -2,146 +2,157 @@
 
 @section('title', 'Gerenciar Pagamento')
 
-@section('header')
-    <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        {{ __('Gerenciar Parcela') }}
-    </h2>
-@endsection
-
 @section('content')
     <div class="py-12">
         <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    {{-- TÍTULO E VOLTAR --}}
+                    {{-- CABEÇALHO --}}
                     <div class="flex justify-between items-center mb-6 border-b pb-4">
-                        <h3 class="text-2xl font-bold text-indigo-700">
-                            Parcela #{{ $pagamento->parcela_numero }}
-                            <span class="text-gray-500 font-normal text-lg"> (Aluno: {{ $pagamento->aluno->nome_completo ?? 'N/A' }})</span>
-                        </h3>
-                        <a href="{{ route('admin.pagamentos.index') }}" class="text-sm bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-3 rounded-md transition duration-150">
-                            &larr; Voltar
+                        <div>
+                            <h3 class="text-2xl font-bold text-indigo-700">
+                                Parcela #{{ $pagamento->parcela_numero }}
+                            </h3>
+                            <p class="text-gray-600">Aluno: <span class="font-semibold">{{ $pagamento->aluno->nome_completo ?? 'N/A' }}</span></p>
+                        </div>
+                        <a href="{{ route('staff.pagamentos.index') }}" class="inline-flex items-center text-sm bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold py-2 px-4 rounded-md transition">
+                            <i class="fas fa-arrow-left mr-2"></i> Voltar
                         </a>
                     </div>
 
-                    {{-- BOX DE INFORMAÇÕES BÁSICAS --}}
-                    <div class="border p-4 rounded-lg shadow-md mb-8">
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                            <div>
-                                <p class="text-gray-500">Valor Previsto:</p>
-                                <p class="font-bold text-lg text-indigo-800">R$ {{ number_format($pagamento->valor_previsto, 2, ',', '.') }}</p>
+                    {{-- ALERTAS DE ATRASO --}}
+                    @php
+                        $vencimento = \Carbon\Carbon::parse($pagamento->data_vencimento);
+                        $atrasado = $pagamento->status === 'Pendente' && $vencimento->isPast() && !$vencimento->isToday();
+                        $diasAtraso = $vencimento->diffInDays(now());
+                    @endphp
+
+                    @if($atrasado)
+                        <div class="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+                            <div class="flex">
+                                <div class="flex-shrink-0"><i class="fas fa-exclamation-triangle text-red-400"></i></div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-red-700 font-bold">
+                                        ESTA PARCELA ESTÁ ATRASADA HÁ {{ $diasAtraso }} DIA(S).
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <p class="text-gray-500">Vencimento:</p>
-                                <p class="font-bold text-lg">{{ \Carbon\Carbon::parse($pagamento->data_vencimento)->format('d/m/Y') }}</p>
-                            </div>
-                            <div class="md:col-span-2">
-                                <p class="text-gray-500">Status Atual:</p>
-                                <span class="px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
-                                    @if ($pagamento->status == 'Pago') bg-green-100 text-green-800
-                                    @elseif ($pagamento->status == 'Pendente') bg-yellow-100 text-yellow-800
-                                    @elseif ($pagamento->status == 'Atrasado') bg-red-100 text-red-800
-                                    @elseif ($pagamento->status == 'Cancelado') bg-gray-200 text-gray-700
-                                    @endif">
-                                    {{ $pagamento->status }}
-                                </span>
-                            </div>
+                        </div>
+                    @endif
+
+                    {{-- GRID DE INFORMAÇÕES --}}
+                    <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 mb-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wider font-bold">Valor Previsto</p>
+                            <p class="text-xl font-black text-indigo-600">R$ {{ number_format($pagamento->valor_previsto, 2, ',', '.') }}</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wider font-bold">Vencimento</p>
+                            <p class="text-lg font-bold {{ $atrasado ? 'text-red-600' : '' }}">{{ $vencimento->format('d/m/Y') }}</p>
+                        </div>
+                        <div class="md:col-span-2">
+                            <p class="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Status Atual</p>
+                            <span class="px-3 py-1 text-xs font-bold rounded-full 
+                                @if($pagamento->status == 'Pago') bg-green-100 text-green-800
+                                @elseif($atrasado) bg-red-100 text-red-800
+                                @elseif($pagamento->status == 'Pendente') bg-yellow-100 text-yellow-800
+                                @else bg-gray-200 text-gray-700 @endif">
+                                {{ $atrasado ? 'ATRASADO' : $pagamento->status }}
+                            </span>
                         </div>
                     </div>
 
-                    @if (session('success'))
-                        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-                            <p class="font-bold">Sucesso!</p>
-                            <p>{{ session('success') }}</p>
-                        </div>
-                    @endif
-
-                    @if ($errors->any())
-                        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-                            <p class="font-bold">Erro de Validação!</p>
-                            <ul> @foreach ($errors->all() as $error) <li>{{ $error }}</li> @endforeach </ul>
-                        </div>
-                    @endif
-
-                    {{-- SEÇÃO DE REGISTRO / AÇÕES --}}
-                    @if ($pagamento->status == 'Pendente' || $pagamento->status == 'Atrasado')
-                        <h4 class="text-xl font-bold mb-4 text-green-700">Registrar Pagamento</h4>
-                        
-                        {{-- FORMULÁRIO PRINCIPAL DE PAGAMENTO (AÇÃO: PAY) --}}
-                        <form method="POST" action="{{ route('admin.pagamentos.update', $pagamento->id) }}" class="p-4 border rounded-lg shadow-inner bg-green-50">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="action" value="pay">
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                                <div>
-                                    <label for="valor_pago" class="block text-sm font-medium text-gray-700">Valor Pago (R$)</label>
-                                    <input type="number" step="0.01" name="valor_pago" id="valor_pago" value="{{ old('valor_pago', $pagamento->valor_previsto) }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                                </div>
-                                <div>
-                                    <label for="data_pagamento" class="block text-sm font-medium text-gray-700">Data do Pagamento</label>
-                                    <input type="date" name="data_pagamento" id="data_pagamento" value="{{ old('data_pagamento', date('Y-m-d')) }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label for="metodo_pagamento" class="block text-sm font-medium text-gray-700">Método de Pagamento</label>
-                                    <input type="text" name="metodo_pagamento" id="metodo_pagamento" value="{{ old('metodo_pagamento') }}" placeholder="Ex: PIX, Boleto Compensado" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
-                                </div>
-                                <div class="md:col-span-2">
-                                    <label for="observacoes" class="block text-sm font-medium text-gray-700">Observações (Opcional)</label>
-                                    <textarea name="observacoes" id="observacoes" rows="2" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">{{ old('observacoes') }}</textarea>
-                                </div>
-                            </div>
+                    {{-- SEÇÃO DE AÇÃO --}}
+                    @if ($pagamento->status == 'Pendente')
+                        <div class="bg-white border-2 border-green-100 rounded-xl p-6 shadow-sm">
+                            <h4 class="text-lg font-bold mb-4 text-green-700 flex items-center">
+                                <i class="fas fa-cash-register mr-2"></i> Confirmar Recebimento
+                            </h4>
                             
-                            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md shadow-lg transition duration-150">
-                                CONFIRMAR RECEBIMENTO
-                            </button>
-                        </form>
+                            <form method="POST" action="{{ route('staff.pagamentos.update', $pagamento->id) }}">
+                                @csrf @method('PUT')
+                                <input type="hidden" name="action" value="pay">
 
-                        {{-- FORMULÁRIO SEPARADO PARA CANCELAMENTO (AÇÃO: CANCEL) --}}
-                        <h4 class="text-lg font-bold mt-8 mb-3 border-b pb-1 text-red-700">Outras Ações</h4>
-                        <form action="{{ route('admin.pagamentos.update', $pagamento->id) }}" method="POST" class="inline" onsubmit="return confirm('ATENÇÃO! Tem certeza que deseja CANCELAR esta parcela? Isso afetará o financeiro.')">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="action" value="cancel">
-                            <button type="submit" class="text-red-700 hover:text-white border border-red-500 hover:bg-red-600 py-2 px-4 rounded-md shadow-sm transition duration-150">
-                                Cancelar Parcela
-                            </button>
-                        </form>
-                        
-                    @elseif ($pagamento->status == 'Pago' || $pagamento->status == 'Cancelado')
-                        
-                        {{-- SEÇÃO DE DETALHES DO REGISTRO --}}
-                        <h4 class="text-xl font-bold mt-4 mb-4 text-gray-700">Detalhes do Registro</h4>
-                        <div class="border p-4 rounded-lg shadow-sm bg-gray-50 text-sm space-y-2">
-                            @if ($pagamento->data_pagamento)
-                                <p><strong>Data de Baixa:</strong> {{ \Carbon\Carbon::parse($pagamento->data_pagamento)->format('d/m/Y') }}</p>
-                            @endif
-                            @if ($pagamento->valor_pago)
-                                <p><strong>Valor Efetivo Recebido:</strong> <span class="text-green-700 font-bold">R$ {{ number_format($pagamento->valor_pago, 2, ',', '.') }}</span></p>
-                            @endif
-                            @if ($pagamento->metodo_pagamento)
-                                <p><strong>Método:</strong> {{ $pagamento->metodo_pagamento }}</p>
-                            @endif
-                            <p><strong>Registrado Por:</strong> {{ $pagamento->registradoPor->name ?? 'Sistema' }}</p>
-                            @if ($pagamento->observacoes)
-                                <p><strong>Observações:</strong> {{ $pagamento->observacoes }}</p>
-                            @endif
-                        </div>
-                        
-                        {{-- AÇÃO DE REABRIR --}}
-                        @if ($pagamento->status != 'Cancelado') {{-- Se estiver pago, permite reabrir. Se estiver cancelado, talvez você não queira permitir reabrir --}}
-                            <form action="{{ route('admin.pagamentos.update', $pagamento->id) }}" method="POST" class="mt-6" onsubmit="return confirm('Tem certeza que deseja REABRIR esta parcela (voltará para Pendente)? Isso deve ser feito em caso de erro no registro.')">
-                                @csrf
-                                @method('PUT')
-                                <input type="hidden" name="action" value="reopen">
-                                <button type="submit" class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-md shadow-sm transition duration-150">
-                                    Reabrir Parcela (Voltar para Pendente)
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700">Valor Recebido (R$)</label>
+                                        <input type="number" step="0.01" name="valor_pago" value="{{ old('valor_pago', $pagamento->valor_previsto) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700">Data da Baixa</label>
+                                        <input type="date" name="data_pagamento" value="{{ date('Y-m-d') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-bold text-gray-700">Forma de Pagamento</label>
+                                        <select name="metodo_pagamento" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500">
+                                            <option value="">Selecione...</option>
+                                            <option value="PIX">PIX</option>
+                                            <option value="Dinheiro">Dinheiro</option>
+                                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                                            <option value="Cartão de Débito">Cartão de Débito</option>
+                                            <option value="Transferência">Transferência / TED</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-4">
+                                    <label class="block text-sm font-bold text-gray-700">Observações Internas</label>
+                                    <textarea name="observacoes" rows="2" placeholder="Algum detalhe importante?" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-green-500 focus:border-green-500"></textarea>
+                                </div>
+
+                                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-black py-3 rounded-lg shadow-md transition">
+                                    BAIXAR PAGAMENTO AGORA
                                 </button>
                             </form>
-                        @endif
+                        </div>
+
+                        {{-- BOTÃO CANCELAR DISCRETO --}}
+                        <div class="mt-8 pt-6 border-t flex justify-end">
+                            <form action="{{ route('admin.pagamentos.update', $pagamento->id) }}" method="POST" onsubmit="return confirm('Confirmar o cancelamento desta parcela?')">
+                                @csrf @method('PUT')
+                                <input type="hidden" name="action" value="cancel">
+                                <button type="submit" class="text-gray-400 hover:text-red-600 text-sm flex items-center transition">
+                                    <i class="fas fa-times-circle mr-1"></i> Cancelar esta parcela
+                                </button>
+                            </form>
+                        </div>
+
+                    @else
+                        {{-- HISTÓRICO DO PAGAMENTO --}}
+                        <div class="bg-blue-50 border border-blue-100 rounded-xl p-6">
+                            <h4 class="text-lg font-bold mb-4 text-blue-800">Detalhes do Recebimento</h4>
+                            <div class="space-y-3">
+                                <div class="flex justify-between border-b border-blue-100 pb-2">
+                                    <span class="text-gray-600 font-medium">Data do Pagamento:</span>
+                                    <span class="font-bold text-gray-800">{{ $pagamento->data_pagamento ? \Carbon\Carbon::parse($pagamento->data_pagamento)->format('d/m/Y') : '-' }}</span>
+                                </div>
+                                <div class="flex justify-between border-b border-blue-100 pb-2">
+                                    <span class="text-gray-600 font-medium">Valor Pago:</span>
+                                    <span class="font-bold text-green-700 text-lg">R$ {{ number_format($pagamento->valor_pago, 2, ',', '.') }}</span>
+                                </div>
+                                <div class="flex justify-between border-b border-blue-100 pb-2">
+                                    <span class="text-gray-600 font-medium">Método:</span>
+                                    <span class="font-bold text-gray-800">{{ $pagamento->metodo_pagamento }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600 font-medium">Operador:</span>
+                                    <span class="font-bold text-gray-800">{{ $pagamento->registradoPor->name ?? 'Sistema' }}</span>
+                                </div>
+                            </div>
+
+                            @if($pagamento->status == 'Pago')
+                                <form action="{{ route('staff.pagamentos.update', $pagamento->id) }}" method="POST" class="mt-6 pt-4 border-t border-blue-200" onsubmit="return confirm('Atenção: A parcela voltará para pendente. Continuar?')">
+                                    @csrf @method('PUT')
+                                    <input type="hidden" name="action" value="reopen">
+                                    <button type="submit" class="text-yellow-700 hover:text-yellow-800 font-bold text-xs uppercase tracking-tighter">
+                                        <i class="fas fa-undo mr-1"></i> Erro no registro? Reabrir Parcela
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
                     @endif
-                    
+
                 </div>
             </div>
         </div>
