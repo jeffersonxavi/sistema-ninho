@@ -271,29 +271,43 @@ class AlunoController extends Controller
     /**
      * Calcula um status financeiro geral do aluno baseado nas parcelas.
      */
-    private function calcularStatusGeral(Aluno $aluno): string
-    {
-        $pagamentos = $aluno->pagamentos;
+private function calcularStatusGeral(Aluno $aluno): string
+{
+    $pagamentos = $aluno->pagamentos;
 
-        if ($pagamentos->isEmpty()) {
-            return 'Sem Parcelas Geradas';
-        }
-
-        $pendentes = $pagamentos->where('status', 'Pendente')->count();
-        $atrasados = $pagamentos->where('status', 'Atrasado')->count();
-        $pagos = $pagamentos->where('status', 'Pago')->count();
-
-        // Regra para definir o status principal
-        if ($atrasados > 0) {
-            return "Em Dívida ({$atrasados} Atrasada(s))";
-        } elseif ($pendentes == 0 && $pagos > 0) {
-            return 'Contrato Finalizado/Pago';
-        } elseif ($pendentes > 0 && $pagos == 0) {
-            return 'Em Andamento (1ª pendente)';
-        }
-
-        return 'Em Andamento';
+    if ($pagamentos->isEmpty()) {
+        return 'Sem Parcelas Geradas';
     }
+
+    $hoje = now();
+
+    $atrasados = $pagamentos->filter(function ($p) use ($hoje) {
+        return $p->status === 'Pendente'
+            && Carbon::parse($p->data_vencimento)->lt($hoje);
+    })->count();
+
+    $pendentes = $pagamentos->filter(function ($p) use ($hoje) {
+        return $p->status === 'Pendente'
+            && Carbon::parse($p->data_vencimento)->gte($hoje);
+    })->count();
+
+    $pagos = $pagamentos->where('status', 'Pago')->count();
+
+    if ($atrasados > 0) {
+        return "Atrasado ({$atrasados})";
+    }
+
+    if ($pendentes > 0) {
+        return 'Em Curso (Pendente)';
+    }
+
+    if ($pagos === $pagamentos->count()) {
+        return 'Quitado (Pago)';
+    }
+
+    return 'Aguardando Pagamento';
+}
+
 
     // ... (fim da classe) ...
 }
