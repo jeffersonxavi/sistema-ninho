@@ -113,7 +113,10 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse($pagamentos as $pagamento)
-                                    @php $atrasado = $pagamento->status === 'Atrasado'; @endphp
+                                        @php
+                                            $atrasado = $pagamento->status !== 'Pago'
+                                                && \Carbon\Carbon::parse($pagamento->data_vencimento)->isPast();
+                                        @endphp
                                     <tr class="{{ $atrasado ? 'bg-red-25' : 'hover:bg-gray-50' }} transition">
                                         <td class="px-4 py-3 text-sm text-gray-900">
                                             {{ $pagamento->aluno->nome_completo ?? 'Aluno Excluído' }}
@@ -126,14 +129,13 @@
                                         </td>
                                         <td class="px-4 py-3 text-sm {{ $atrasado ? 'text-red-600 font-medium' : 'text-gray-700' }}">
                                             {{ \Carbon\Carbon::parse($pagamento->data_vencimento)->format('d/m/Y') }}
-                                            @if($atrasado)<span class="ml-1 text-xs">(atraso)</span>@endif
                                         </td>
                                         <td class="px-4 py-3 text-sm">
                                             <span class="px-3 py-1 text-xs font-medium rounded-full
-                                                {{ $pagamento->status == 'Pago' ? 'bg-green-100 text-green-800' :
-                                                   ($pagamento->status == 'Pendente' ? 'bg-yellow-100 text-yellow-800' :
-                                                   ($pagamento->status == 'Atrasado' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800')) }}">
-                                                {{ $pagamento->status }}
+                                            {{ $pagamento->status === 'Pago' ? 'bg-green-100 text-green-800' :
+                                            ($atrasado ? 'bg-red-100 text-red-800' :
+                                            'bg-yellow-100 text-yellow-800') }}">
+                                                {{ $pagamento->status === 'Pago' ? 'Pago' : ($atrasado ? 'Atrasado' : 'Pendente') }}
                                             </span>
                                         </td>
                                         <td class="px-4 py-3 text-center">

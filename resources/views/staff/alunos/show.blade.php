@@ -122,18 +122,28 @@
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach ($aluno->pagamentos as $pagamento)
-                                    <tr class="{{ $pagamento->status == 'Atrasado' ? 'bg-red-50' : ($pagamento->status == 'Pago' ? 'bg-green-50' : '') }}">
+                                        @php
+                                            $statusCalculado = $pagamento->status;
+
+                                            if (
+                                                $pagamento->status === 'Pendente' &&
+                                                \Carbon\Carbon::parse($pagamento->data_vencimento)->lt(now())
+                                            ) {
+                                                $statusCalculado = 'Atrasado';
+                                            }
+                                        @endphp
+                                        <tr class="{{ $statusCalculado === 'Atrasado' ? 'bg-red-50' : ($statusCalculado === 'Pago' ? 'bg-green-50' : '') }}">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $pagamento->parcela_numero }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">R$ {{ number_format($pagamento->valor_previsto, 2, ',', '.') }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ \Carbon\Carbon::parse($pagamento->data_vencimento)->format('d/m/Y') }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                                @if ($pagamento->status == 'Pago') bg-green-200 text-green-900
-                                                @elseif ($pagamento->status == 'Pendente') bg-yellow-200 text-yellow-900
-                                                @elseif ($pagamento->status == 'Atrasado') bg-red-200 text-red-900
+                                           <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                @if ($statusCalculado === 'Pago') bg-green-200 text-green-900
+                                                @elseif ($statusCalculado === 'Atrasado') bg-red-200 text-red-900
+                                                @elseif ($statusCalculado === 'Pendente') bg-yellow-200 text-yellow-900
                                                 @else bg-gray-200 text-gray-900
                                                 @endif">
-                                                {{ $pagamento->status }}
+                                                {{ $statusCalculado }}
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

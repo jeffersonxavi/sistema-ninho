@@ -4,7 +4,7 @@
 
 @section('header')
     <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        <i class="fas fa-receipt mr-2 text-indigo-600"></i> {{ __('Contas a Receber (Parcelas)') }}
+        <i class="fas fa-receipt mr-2 text-indigo-600"></i> {{ __('Contas a Receber (Staff)') }}
     </h2>
 @endsection
 
@@ -15,107 +15,92 @@
                 <div class="p-6 text-gray-900">
 
                     @if (session('success'))
-                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6 transition duration-150 ease-in-out" role="alert">
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-6" role="alert">
                             <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
                         </div>
                     @endif
 
                     <div class="mb-6 border-b pb-4 flex flex-col md:flex-row justify-between items-center">
-                        <form method="GET" action="{{ route('admin.pagamentos.index') }}" class="w-full md:w-1/3 mb-4 md:mb-0">
+                        <form method="GET" action="{{ route('staff.pagamentos.index') }}" class="w-full md:w-1/3 mb-4 md:mb-0">
                             <input type="hidden" name="status" value="{{ $status }}"> 
                             <div class="relative">
-                                <input type="text" name="aluno" placeholder="Buscar por nome do aluno..." 
+                                <input type="text" name="aluno" placeholder="Buscar aluno..." 
                                        value="{{ request('aluno') }}"
                                        class="w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm pl-10">
                                 <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                             </div>
                         </form>
 
-                        <div class="flex space-x-2 sm:space-x-4 overflow-x-auto pb-2">
+                        <div class="flex space-x-2 overflow-x-auto pb-2">
                             @foreach ($status_options as $option)
-                                <a href="{{ route('admin.pagamentos.index', array_merge(request()->except('page'), ['status' => $option])) }}" 
-                                   class="flex-shrink-0 py-2 px-4 rounded-full text-sm font-medium transition duration-150 ease-in-out whitespace-nowrap 
-                                   {{ $status === $option ? 'bg-indigo-600 text-white shadow-lg scale-105' : 'bg-gray-100 text-gray-700 hover:bg-indigo-100 hover:text-indigo-800' }}">
-                                    @if ($option === 'Atrasado') <i class="fas fa-clock mr-1"></i> @endif
-                                    @if ($option === 'Pago') <i class="fas fa-check-circle mr-1"></i> @endif
-                                    @if ($option === 'Pendente') <i class="fas fa-hourglass-half mr-1"></i> @endif
-                                    @if ($option === 'Cancelado') <i class="fas fa-times-circle mr-1"></i> @endif
+                                <a href="{{ route('staff.pagamentos.index', array_merge(request()->except('page'), ['status' => $option])) }}" 
+                                   class="flex-shrink-0 py-2 px-4 rounded-full text-sm font-medium transition duration-150
+                                   {{ $status === $option ? 'bg-indigo-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-indigo-100' }}">
                                     {{ $option }}
                                 </a>
                             @endforeach
                         </div>
                     </div>
 
-                    <h3 class="text-xl font-extrabold mb-4 pb-2 text-indigo-700">
-                        Visualizando: <span class="text-gray-900">{{ $status }} ({{ $pagamentos->total() ?? 0 }})</span>
-                    </h3>
-
                     <div class="overflow-x-auto shadow-md sm:rounded-lg">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-indigo-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Aluno</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Parcela</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase">Aluno</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase">Parcela</th>
                                     <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Valor Previsto</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Vencimento</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Status</th>
-                                    <th class="px-6 py-3 text-center text-xs font-bold text-indigo-700 uppercase tracking-wider">Ações</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase">Vencimento</th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase">Status</th>
+                                    <th class="px-6 py-3 text-center text-xs font-bold text-indigo-700 uppercase">Ações</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse ($pagamentos as $pagamento)
                                     @php
-                                        // Variáveis de estilo
-                                        $isAtrasado = $pagamento->status === 'Atrasado';
-                                        $rowClass = $isAtrasado ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50';
+                                        // Lógica para identificar atraso real
+                                        $vencimento = \Carbon\Carbon::parse($pagamento->data_vencimento);
+                                        $estaAtrasado = $pagamento->status === 'Pendente' && $vencimento->isPast() && !$vencimento->isToday();
                                     @endphp
-                                    <tr class="{{ $rowClass }} transition duration-150 ease-in-out">
-                                        
+                                    <tr class="hover:bg-gray-50 {{ $estaAtrasado ? 'bg-red-50' : '' }}">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            <i class="fas fa-user-circle mr-1 text-gray-500"></i>
-                                            {{ $pagamento->aluno->nome_completo ?? 'Aluno Excluído' }}
+                                            {{ $pagamento->aluno->nome_completo ?? 'N/A' }}
                                         </td>
-                                        
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            <span class="font-semibold text-gray-700">{{ $pagamento->parcela_numero }}</span> de {{ $pagamento->aluno->qtd_parcelas ?? '?' }}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                            {{ $pagamento->parcela_numero }}ª Parcela
                                         </td>
-                                        
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-700 font-bold">
+                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-green-700 font-bold">
                                             R$ {{ number_format($pagamento->valor_previsto, 2, ',', '.') }}
                                         </td>
-                                        
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm 
-                                            {{ $isAtrasado ? 'text-red-600 font-bold' : 'text-gray-500' }}">
-                                            @if ($isAtrasado)
-                                                <i class="fas fa-exclamation-triangle mr-1 animate-pulse"></i>
-                                            @endif
-                                            {{ \Carbon\Carbon::parse($pagamento->data_vencimento)->format('d/m/Y') }}
-                                        </td>
-                                        
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full uppercase tracking-wider 
-                                                @if ($pagamento->status == 'Pago') bg-green-100 text-green-800
-                                                @elseif ($pagamento->status == 'Pendente') bg-yellow-100 text-yellow-800
-                                                @elseif ($pagamento->status == 'Atrasado') bg-red-100 text-red-800
-                                                @else bg-gray-100 text-gray-800
-                                                @endif">
-                                                {{ $pagamento->status }}
+                                            <span class="{{ $estaAtrasado ? 'text-red-600 font-bold' : 'text-gray-600' }}">
+                                                {{ $vencimento->format('d/m/Y') }}
                                             </span>
                                         </td>
-                                        
-                                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                            <a href="{{ route('admin.pagamentos.show', $pagamento->id) }}" 
-                                               class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm 
-                                               text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150">
-                                                <i class="fas fa-cog mr-2"></i> Gerenciar
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            @if($estaAtrasado)
+                                                <span class="px-2 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">
+                                                    Atrasado
+                                                </span>
+                                            @else
+                                                <span class="px-2 py-1 rounded-full text-xs font-bold
+                                                    @if($pagamento->status == 'Pago') bg-green-100 text-green-800
+                                                    @elseif($pagamento->status == 'Pendente') bg-yellow-100 text-yellow-800
+                                                    @else bg-gray-100 text-gray-800 @endif">
+                                                    {{ $pagamento->status }}
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-center text-sm">
+                                            <a href="{{ route('staff.pagamentos.show', $pagamento->id) }}" 
+                                               class="inline-flex items-center px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
+                                                <i class="fas fa-cog mr-1"></i> Gerenciar
                                             </a>
                                         </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-6 py-8 whitespace-nowrap text-base text-center text-gray-500">
-                                            <i class="fas fa-folder-open text-2xl mb-2"></i>
-                                            <p>Nenhuma parcela encontrada com o status **"{{ $status }}"**.</p>
+                                        <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                            Nenhum registro encontrado para o status <strong>{{ $status }}</strong>.
                                         </td>
                                     </tr>
                                 @endforelse
@@ -123,7 +108,7 @@
                         </table>
                     </div>
                     
-                    <div class="mt-6">
+                    <div class="mt-4">
                         {{ $pagamentos->appends(request()->except('page'))->links() }}
                     </div>
                 </div>
@@ -131,7 +116,3 @@
         </div>
     </div>
 @endsection
-
-@push('scripts')
-    <script src="https://kit.fontawesome.com/SEU_CÓDIGO_AQUI.js" crossorigin="anonymous"></script> 
-@endpush
