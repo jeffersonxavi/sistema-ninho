@@ -13,7 +13,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    
+
                     {{-- Mensagens de Sessão (Sucesso/Erro) --}}
                     @if (session('success'))
                         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative mb-4" role="alert">
@@ -23,7 +23,7 @@
 
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-lg font-bold">Lista de Professores</h3>
-                        
+
                         {{-- Botão: Criar Novo Professor --}}
                         <a href="{{ route('admin.professores.create') }}" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md shadow-sm transition duration-150">
                             + Cadastrar Novo Professor
@@ -43,20 +43,31 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach ($professores as $professor)
+                                @forelse ($professores as $professor)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap">{{ $professor->id }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $professor->nome }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $professor->cadastradoPor->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ $professor->created_at->format('d/m/Y') }}</td>
+                                        
+                                        {{-- Nome do professor vindo do User --}}
+                                        <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                                            {{ $professor->user ? $professor->user->name : '—' }}
+                                        </td>
+
+                                        {{-- Nome do admin que cadastrou --}}
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            {{ $professor->cadastradoPor ? $professor->cadastradoPor->name : '—' }}
+                                        </td>
+
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            {{ $professor->created_at ? $professor->created_at->format('d/m/Y') : '—' }}
+                                        </td>
+
                                         <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                            
                                             {{-- Botão: Editar --}}
                                             <a href="{{ route('admin.professores.edit', $professor) }}" class="text-indigo-600 hover:text-indigo-900 mr-3 transition duration-150">
                                                 Editar
                                             </a>
-                                            
-                                            {{-- Botão: Excluir (Formulário) --}}
+
+                                            {{-- Botão: Excluir --}}
                                             <form action="{{ route('admin.professores.destroy', $professor) }}" method="POST" class="inline" onsubmit="return confirm('ATENÇÃO: A exclusão do professor também afetará as turmas. Tem certeza que deseja excluir?');">
                                                 @csrf
                                                 @method('DELETE')
@@ -66,13 +77,17 @@
                                             </form>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center text-gray-500 py-4">
+                                            Nenhum professor cadastrado. Clique em "Cadastrar Novo Professor" para começar.
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
-                    @if ($professores->isEmpty())
-                        <p class="text-center text-gray-500 mt-4">Nenhum professor cadastrado. Clique em "Cadastrar Novo Professor" para começar.</p>
-                    @endif
+
                 </div>
             </div>
         </div>

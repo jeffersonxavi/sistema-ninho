@@ -1,26 +1,35 @@
 @extends('layouts.app')
 
-@section('title', 'Cadastrar Professor')
+@section('title', isset($professor) ? 'Editar Professor' : 'Cadastrar Professor')
 
 @section('header')
     <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-        {{ __('Cadastrar Novo Professor') }}
+        {{ isset($professor) ? 'Editar Professor' : 'Cadastrar Novo Professor' }}
     </h2>
 @endsection
 
 @section('content')
-<div class="py-12" x-data="formValidation()">
+<div class="py-12" x-data="formValidation({{ isset($professor) ? json_encode($professor->user ?? []) : '{}' }})">
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200">
             <div class="p-8">
-                
+
                 <div class="mb-8">
-                    <h3 class="text-xl font-bold text-gray-800">Detalhes do Novo Professor</h3>
-                    <p class="text-sm text-gray-500">O sistema validará os dados conforme você preenche.</p>
+                    <h3 class="text-xl font-bold text-gray-800">
+                        {{ isset($professor) ? 'Editar Dados do Professor' : 'Detalhes do Novo Professor' }}
+                    </h3>
+                    <p class="text-sm text-gray-500">
+                        O sistema validará os dados conforme você preenche.
+                    </p>
                 </div>
 
-                <form method="POST" action="{{ route('admin.professores.store') }}" @submit.prevent="submitForm">
+                <form method="POST" 
+                      action="{{ isset($professor) ? route('admin.professores.update', $professor) : route('admin.professores.store') }}"
+                      @submit.prevent="submitForm">
                     @csrf
+                    @if(isset($professor))
+                        @method('PUT')
+                    @endif
 
                     <div class="space-y-6">
                         {{-- Nome Completo --}}
@@ -50,7 +59,11 @@
 
                                 {{-- Senha --}}
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700">Senha</label>
+                                    <label class="block text-sm font-medium text-gray-700">
+                                        Senha
+                                        <span x-show="!isEditForm">(obrigatória)</span>
+                                        <span x-show="isEditForm">(deixe em branco para manter a senha atual)</span>
+                                    </label>
                                     <div class="mt-1 relative">
                                         <input :type="showPasswords ? 'text' : 'password'" name="password" 
                                                x-model="fields.password" @input="validatePasswords"
@@ -65,7 +78,7 @@
                                             </template>
                                         </button>
                                     </div>
-                                    {{-- Barra de Força --}}
+                                    {{-- Barra de força --}}
                                     <div class="mt-2 h-1 w-full bg-gray-200 rounded-full overflow-hidden">
                                         <div class="h-full transition-all duration-500" 
                                              :class="passwordStrengthColor" 
@@ -92,7 +105,7 @@
                         <button type="submit" 
                                 :disabled="hasErrors"
                                 class="rounded-md bg-indigo-600 px-8 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150">
-                            Cadastrar Professor
+                            {{ isset($professor) ? 'Atualizar Professor' : 'Cadastrar Professor' }}
                         </button>
                     </div>
                 </form>
@@ -102,57 +115,60 @@
 </div>
 
 <script>
-    function formValidation() {
-        return {
-            showPasswords: false,
-            fields: {
-                nome: '',
-                email: '',
-                password: '',
-                password_confirmation: ''
-            },
-            errors: {
-                nome: '',
-                email: '',
-                password_confirmation: ''
-            },
-            
-            validateEmail() {
-                const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-                this.errors.email = re.test(this.fields.email) ? '' : 'Insira um e-mail válido.';
-            },
+function formValidation(existingUser = {}) {
+    return {
+        showPasswords: false,
+        isEditForm: Object.keys(existingUser).length > 0,
+        fields: {
+            nome: existingUser.name || '',
+            email: existingUser.email || '',
+            password: '',
+            password_confirmation: ''
+        },
+        errors: {
+            nome: '',
+            email: '',
+            password_confirmation: ''
+        },
 
-            validatePasswords() {
-                if (this.fields.password_confirmation && this.fields.password !== this.fields.password_confirmation) {
-                    this.errors.password_confirmation = 'As senhas não coincidem.';
-                } else {
-                    this.errors.password_confirmation = '';
-                }
-            },
+        validateEmail() {
+            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            this.errors.email = re.test(this.fields.email) ? '' : 'Insira um e-mail válido.';
+        },
 
-            get passwordStrengthWidth() {
-                return Math.min((this.fields.password.length / 8) * 100, 100);
-            },
+        validatePasswords() {
+            if (this.fields.password_confirmation && this.fields.password !== this.fields.password_confirmation) {
+                this.errors.password_confirmation = 'As senhas não coincidem.';
+            } else {
+                this.errors.password_confirmation = '';
+            }
+        },
 
-            get passwordStrengthColor() {
-                if (this.fields.password.length < 4) return 'bg-red-500';
-                if (this.fields.password.length < 8) return 'bg-yellow-500';
-                return 'bg-green-500';
-            },
+        get passwordStrengthWidth() {
+            if (!this.fields.password) return 0;
+            return Math.min((this.fields.password.length / 8) * 100, 100);
+        },
 
-            get hasErrors() {
-                return this.errors.email !== '' || 
-                       this.errors.password_confirmation !== '' || 
-                       this.fields.password.length < 8 ||
-                       this.fields.nome.length < 3;
-            },
+        get passwordStrengthColor() {
+            if (this.fields.password.length < 4) return 'bg-red-500';
+            if (this.fields.password.length < 8) return 'bg-yellow-500';
+            return 'bg-green-500';
+        },
 
-            submitForm(e) {
-                if (!this.hasErrors) {
-                    e.target.submit();
-                }
+        get hasErrors() {
+            if (!this.fields.nome || this.fields.nome.length < 3) return true;
+            if (!this.fields.email) return true;
+            if (this.fields.password_confirmation && this.fields.password !== this.fields.password_confirmation) return true;
+            if (!this.isEditForm && this.fields.password.length < 8) return true;
+            return false;
+        },
+
+        submitForm(e) {
+            if (!this.hasErrors) {
+                e.target.submit();
             }
         }
     }
+}
 </script>
 @endsection
