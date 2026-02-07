@@ -54,6 +54,7 @@ class ProfessorController extends Controller
 
         // 3. Criar o Professor e vinculá-lo ao novo User
         Professor::create([
+            'nome' => $request->nome,
             'cadastrado_por_user_id' => Auth::id(), // ID do Admin que cadastrou (conforme regra original)
             'user_id' => $user->id, // ID do novo Staff (linkando professor e usuário)
         ]);
