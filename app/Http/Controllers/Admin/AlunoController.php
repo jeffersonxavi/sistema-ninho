@@ -101,7 +101,7 @@ class AlunoController extends Controller
         try {
 
             // 1️⃣ CRIA OU BUSCA O RESPONSÁVEL
-            $responsavel = \App\Models\Responsavel::firstOrCreate(
+            $responsavel = \App\Models\Responsavel::updateOrCreate(
                 ['cpf' => $data['cpf']],
                 [
                     'nome' => $data['nome_responsavel'],
@@ -253,34 +253,33 @@ class AlunoController extends Controller
             'forma_pagamento' => ['required', 'string', 'max:50'],
         ]);
 
+     
         DB::beginTransaction();
 
         try {
 
-            // 🔹 Atualiza ou cria responsável se não existir
-            if ($aluno->responsavel) {
-                $aluno->responsavel->update([
+            /*
+            |--------------------------------------------------------------------------
+            | 1️⃣ Busca ou cria responsável pelo CPF
+            |--------------------------------------------------------------------------
+            */
+            $responsavel = \App\Models\Responsavel::updateOrCreate(
+                ['cpf' => $data['cpf']],
+                [
                     'nome' => $data['nome_responsavel'],
-                    'cpf' => $data['cpf'] ?? null,
                     'rg' => $data['rg'] ?? null,
                     'telefone' => $data['telefone'],
                     'endereco' => $data['endereco'] ?? null,
-                ]);
-            } else {
-                $responsavel = \App\Models\Responsavel::create([
-                    'nome' => $data['nome_responsavel'],
-                    'cpf' => $data['cpf'] ?? null,
-                    'rg' => $data['rg'] ?? null,
-                    'telefone' => $data['telefone'],
-                    'endereco' => $data['endereco'] ?? null,
-                ]);
+                ]
+            );
 
-                $aluno->responsavel_id = $responsavel->id;
-                $aluno->save();
-            }
-
-            // 🔹 Atualiza apenas dados do aluno
+            /*
+            |--------------------------------------------------------------------------
+            | 2️⃣ Vincula o aluno ao responsável correto
+            |--------------------------------------------------------------------------
+            */
             $aluno->update([
+                'responsavel_id' => $responsavel->id,
                 'nome_completo' => $data['nome_completo'],
                 'data_nascimento' => $data['data_nascimento'],
                 'turma_id' => $data['turma_id'],
