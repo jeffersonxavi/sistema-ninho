@@ -34,4 +34,5 @@ class Aluno extends Model
     public function turma(): BelongsTo { return $this->belongsTo(Turma::class); }
     public function pagamentos(): HasMany { return $this->hasMany(Pagamento::class); }
     public function cadastradoPor(): BelongsTo { return $this->belongsTo(User::class, 'cadastrado_por_user_id'); }
+    public function responsavel(){return $this->belongsTo(Responsavel::class);}
 }
