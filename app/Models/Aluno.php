@@ -19,8 +19,8 @@ class Aluno extends Model
     ];
 
     protected $fillable = [
-        'nome_completo', 'data_nascimento', 'nome_responsavel', 'rg', 'cpf', 'endereco', 
-        'telefone', 'data_matricula', 'termino_contrato', 'periodo', 'horario', 
+        'nome_completo', 'data_nascimento', 'responsavel_id',
+        'data_matricula', 'termino_contrato', 'periodo', 'horario', 
         'dias_da_semana', // SINCRONIZADO COM A MIGRATION
         
         'valor_total', 'valor_parcela', 

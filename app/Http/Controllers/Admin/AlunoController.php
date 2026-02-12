@@ -96,18 +96,27 @@ class AlunoController extends Controller
         DB::beginTransaction();
 
         try {
-            // 1. CRIAÇÃO DO ALUNO
+
+            // 1️⃣ CRIA OU BUSCA O RESPONSÁVEL
+            $responsavel = \App\Models\Responsavel::firstOrCreate(
+                ['cpf' => $data['cpf']],
+                [
+                    'nome' => $data['nome_responsavel'],
+                    'rg' => $data['rg'] ?? null,
+                    'telefone' => $data['telefone'],
+                    'endereco' => $data['endereco'] ?? null,
+                ]
+            );
+
+            // 2️⃣ CRIAÇÃO DO ALUNO (SEM CPF E RG)
             $aluno = Aluno::create([
-                // Dados Pessoais
                 'nome_completo' => $data['nome_completo'],
                 'data_nascimento' => $data['data_nascimento'],
-                'nome_responsavel' => $data['nome_responsavel'],
-                'rg' => $data['rg'] ?? null,
-                'cpf' => $data['cpf'] ?? null,
-                'endereco' => $data['endereco'] ?? null,
-                'telefone' => $data['telefone'],
 
-                // Dados da Matrícula/Curso
+                // AGORA USA A FK
+                'responsavel_id' => $responsavel->id,
+
+                // Dados da Matrícula
                 'turma_id' => $data['turma_id'],
                 'data_matricula' => $data['data_matricula'],
                 'termino_contrato' => $data['termino_contrato'] ?? null,
@@ -115,13 +124,12 @@ class AlunoController extends Controller
                 'horario' => $data['horario'] ?? null,
                 'dias_da_semana' => $data['dias_da_semana'] ?? null,
 
-                // Dados Financeiros
+                // Financeiro
                 'valor_total' => $data['valor_total'],
                 'valor_parcela' => $data['valor_parcela'],
                 'qtd_parcelas' => $data['qtd_parcelas'],
                 'forma_pagamento' => $data['forma_pagamento'],
 
-                // Status e Auditoria
                 'contrato_gerado' => false,
                 'cadastrado_por_user_id' => Auth::id(),
             ]);
