@@ -47,28 +47,28 @@
                                 <div class="grid grid-cols-2 gap-4 mt-4">
                                     <div>
                                         <label for="rg" class="block text-sm font-medium text-gray-700">RG</label>
-                                        <input type="text" name="rg" id="rg" value="{{ old('rg', $aluno->rg) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                        <input type="text" name="rg" id="rg" value="{{ old('rg', $aluno->responsavel->rg ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                     <div>
                                         <label for="cpf" class="block text-sm font-medium text-gray-700">CPF</label>
-                                        <input type="text" name="cpf" id="cpf" value="{{ old('cpf', $aluno->cpf) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                        <input type="text" name="cpf" id="cpf" value="{{ old('cpf', $aluno->responsavel->cpf ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                 </div>
 
                                 {{-- Nome Responsável --}}
                                 <div class="mt-4">
                                     <label for="nome_responsavel" class="block text-sm font-medium text-gray-700">Nome do Responsável <span class="text-red-500">*</span></label>
-                                    <input type="text" name="nome_responsavel" id="nome_responsavel" value="{{ old('nome_responsavel', $aluno->nome_responsavel) }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                    <input type="text" name="nome_responsavel" id="nome_responsavel" value="{{ old('nome_responsavel', $aluno->responsavel->nome ?? '') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                 </div>
                                 
                                 {{-- Telefone e Endereço --}}
                                 <div class="mt-4">
                                     <label for="telefone" class="block text-sm font-medium text-gray-700">Telefone de Contato <span class="text-red-500">*</span></label>
-                                    <input type="text" name="telefone" id="telefone" value="{{ old('telefone', $aluno->telefone) }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                    <input type="text" name="telefone" id="telefone" value="{{ old('telefone', $aluno->responsavel->telefone ?? '') }}" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                 </div>
                                 <div class="mt-4">
                                     <label for="endereco" class="block text-sm font-medium text-gray-700">Endereço Completo</label>
-                                    <input type="text" name="endereco" id="endereco" value="{{ old('endereco', $aluno->endereco) }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                    <input type="text" name="endereco" id="endereco" value="{{ old('endereco', $aluno->responsavel->endereco ?? '') }}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                 </div>
                             </div>
 

@@ -44,7 +44,10 @@
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                         {{ $aluno->nome_completo }}
-                                        <p class="text-xs text-gray-500">Resp.: {{ $aluno->nome_responsavel }} ({{ $aluno->telefone }})</p>
+                                        <p class="text-xs text-gray-500">
+                                            Resp.: {{ $aluno->responsavel->nome ?? 'N/A' }}
+                                            ({{ $aluno->responsavel->telefone ?? 'N/A' }})
+                                        </p>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $aluno->turma->nome ?? 'N/A' }}

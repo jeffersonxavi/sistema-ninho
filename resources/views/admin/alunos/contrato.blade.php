@@ -175,7 +175,7 @@
 
     <div class="parties">
         <p><strong>CONTRATADO:</strong> NINHO – CENTRO DE DESENVOLVIMENTO INFANTOJUVENIL, inscrita no CNPJ sob o número 59.175.247/0001-91, estabelecido à RUA 13 DE MAIO, Nº 434, BAIRRO CENTRO, NO MUNICÍPIO DE GUANAMBI/BA.</p>
-        <p><strong>CONTRATANTE:</strong> {{ $aluno->nome_responsavel ?: $aluno->nome_completo }}, inscrito no {{ $aluno->cpf_responsavel ?? $aluno->cpf ?? 'Não informado' }}, estabelecido à {{ $aluno->endereco }}, responsável pelo aluno <strong>{{ $aluno->nome_completo }}</strong>.</p>
+        <p><strong>CONTRATANTE:</strong> {{ $aluno->responsavel->nome ?: $aluno->nome_completo }}, inscrito no CPF {{$aluno->responsavel->cpf ?? $aluno->cpf ?? 'Não informado' }}, estabelecido à {{ $aluno->responsavel->endereco }}, responsável pelo aluno <strong>{{ $aluno->nome_completo }}</strong>.</p>
     </div>
 
     <div class="clause-title">Cláusula 1 - OBJETO</div>

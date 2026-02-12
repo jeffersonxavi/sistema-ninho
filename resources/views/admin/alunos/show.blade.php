@@ -56,11 +56,11 @@
                             <h4 class="text-lg font-bold mb-3 text-indigo-700">Dados Pessoais e Responsável</h4>
                             <div class="space-y-1 text-sm">
                                 <p><strong>Nascimento:</strong> {{ \Carbon\Carbon::parse($aluno->data_nascimento)->format('d/m/Y') }}</p>
-                                <p><strong>Responsável:</strong> {{ $aluno->nome_responsavel }}</p>
-                                <p><strong>RG:</strong> {{ $aluno->rg ?? 'N/A' }}</p>
-                                <p><strong>CPF:</strong> {{ $aluno->cpf ?? 'N/A' }}</p>
-                                <p><strong>Telefone:</strong> {{ $aluno->telefone }}</p>
-                                <p><strong>Endereço:</strong> {{ $aluno->endereco ?? 'N/A' }}</p>
+                                <p><strong>Responsável:</strong> {{ $aluno->responsavel->nome ?? 'N/A' }}</p>
+                                <p><strong>RG:</strong> {{ $aluno->responsavel->rg ?? 'N/A' }}</p>
+                                <p><strong>CPF:</strong> {{ $aluno->responsavel->cpf ?? 'N/A' }}</p>
+                                <p><strong>Telefone:</strong> {{ $aluno->responsavel->telefone ?? 'N/A' }}</p>
+                                <p><strong>Endereço:</strong> {{ $aluno->responsavel->endereco ?? 'N/A' }}</p>
                             </div>
                         </div>
 

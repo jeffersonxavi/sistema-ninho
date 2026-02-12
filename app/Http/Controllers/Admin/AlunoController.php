@@ -16,8 +16,11 @@ class AlunoController extends Controller
 {
     public function index()
     {
-        $alunos = Aluno::with('turma', 'pagamentos') // Garante que Pagamentos seja carregado
-            ->get();
+        $alunos = Aluno::with([
+            'turma.sala',
+            'pagamentos',
+            'responsavel'
+        ])->get();
 
         $alunos = $alunos->map(function ($aluno) {
             $dataAtual = now();
@@ -141,39 +144,50 @@ class AlunoController extends Controller
 
             $data_matricula = Carbon::parse($data['data_matricula']);
 
-            // Determina a data de vencimento da primeira parcela: mês seguinte, no dia escolhido.
-            $vencimento = $data_matricula->copy()->addMonth();
+            $parcelas = [];
+            /*
+            |--------------------------------------------------------------------------
+            | 1ª PARCELA = DATA DA MATRÍCULA
+            |--------------------------------------------------------------------------
+            */
+            $parcelas[] = [
+                'aluno_id' => $aluno->id,
+                'parcela_numero' => 1,
+                'valor_previsto' => $valor_parcela,
+                'data_vencimento' => $data_matricula->format('Y-m-d'),
+                'status' => 'Pendente',
+                'registrado_por_user_id' => Auth::id(),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
 
-            // Se o dia escolhido for maior que o número de dias do próximo mês, Carbon ajusta
-            // para o último dia válido, mas addMonthNoOverflow() previne isso e garante o dia 1, 5 ou 10.
-            // É importante setar o dia no final para evitar problemas se a matricula for dia 31 e o mês seguinte não tiver.
+            /*
+            |--------------------------------------------------------------------------
+            | RESTANTES = DIA FIXO (1, 5 ou 10)
+            |--------------------------------------------------------------------------
+            */
+
+            $vencimento = $data_matricula->copy()->addMonthNoOverflow();
             $vencimento->day($dia_vencimento);
 
-            $parcelas = [];
-
-            for ($i = 1; $i <= $qtd_parcelas; $i++) {
-                // Garante que a data de vencimento está ajustada para o formato Y-m-d
-                $data_vencimento_parcela = $vencimento->format('Y-m-d');
+            for ($i = 2; $i <= $qtd_parcelas; $i++) {
 
                 $parcelas[] = [
                     'aluno_id' => $aluno->id,
                     'parcela_numero' => $i,
                     'valor_previsto' => $valor_parcela,
-                    'data_vencimento' => $data_vencimento_parcela,
+                    'data_vencimento' => $vencimento->format('Y-m-d'),
                     'status' => 'Pendente',
                     'registrado_por_user_id' => Auth::id(),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
 
-                // Avança para o próximo mês, mantendo o dia 1, 5 ou 10
                 $vencimento->addMonthNoOverflow();
             }
 
-            // Insere todas as parcelas de uma vez para melhor performance
             Pagamento::insert($parcelas);
 
-            // 3. Finalização e Marcação do Contrato
             $aluno->update(['contrato_gerado' => true]);
 
             DB::commit();
@@ -210,6 +224,7 @@ class AlunoController extends Controller
     }
     public function edit(Aluno $aluno)
     {
+        $aluno->load('responsavel');
         $turmas = Turma::with('sala')->orderBy('nome')->get();
         $dias_vencimento = [1, 5, 10];
 
@@ -219,7 +234,6 @@ class AlunoController extends Controller
     public function update(Request $request, Aluno $aluno)
     {
         $data = $request->validate([
-            // Validações iguais às do Store (o campo 'dia_vencimento' será ignorado)
             'nome_completo' => ['required', 'string', 'max:255'],
             'data_nascimento' => ['required', 'date'],
             'nome_responsavel' => ['required', 'string', 'max:255'],
@@ -239,13 +253,59 @@ class AlunoController extends Controller
             'forma_pagamento' => ['required', 'string', 'max:50'],
         ]);
 
-        // Remove campos que não estão no fillable ou que são apenas auxiliares
-        unset($data['dia_vencimento']);
+        DB::beginTransaction();
 
-        $aluno->update($data);
+        try {
 
-        return redirect()->route('admin.alunos.index')->with('success', 'Aluno atualizado com sucesso!');
+            // 🔹 Atualiza ou cria responsável se não existir
+            if ($aluno->responsavel) {
+                $aluno->responsavel->update([
+                    'nome' => $data['nome_responsavel'],
+                    'cpf' => $data['cpf'] ?? null,
+                    'rg' => $data['rg'] ?? null,
+                    'telefone' => $data['telefone'],
+                    'endereco' => $data['endereco'] ?? null,
+                ]);
+            } else {
+                $responsavel = \App\Models\Responsavel::create([
+                    'nome' => $data['nome_responsavel'],
+                    'cpf' => $data['cpf'] ?? null,
+                    'rg' => $data['rg'] ?? null,
+                    'telefone' => $data['telefone'],
+                    'endereco' => $data['endereco'] ?? null,
+                ]);
+
+                $aluno->responsavel_id = $responsavel->id;
+                $aluno->save();
+            }
+
+            // 🔹 Atualiza apenas dados do aluno
+            $aluno->update([
+                'nome_completo' => $data['nome_completo'],
+                'data_nascimento' => $data['data_nascimento'],
+                'turma_id' => $data['turma_id'],
+                'data_matricula' => $data['data_matricula'],
+                'termino_contrato' => $data['termino_contrato'] ?? null,
+                'periodo' => $data['periodo'],
+                'horario' => $data['horario'] ?? null,
+                'dias_da_semana' => $data['dias_da_semana'] ?? null,
+                'valor_total' => $data['valor_total'],
+                'valor_parcela' => $data['valor_parcela'],
+                'qtd_parcelas' => $data['qtd_parcelas'],
+                'forma_pagamento' => $data['forma_pagamento'],
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.alunos.index')
+                ->with('success', 'Aluno atualizado com sucesso!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()
+                ->withErrors(['erro' => 'Erro ao atualizar aluno: ' . $e->getMessage()]);
+        }
     }
+
 
     public function destroy(Aluno $aluno)
     {
@@ -279,42 +339,42 @@ class AlunoController extends Controller
     /**
      * Calcula um status financeiro geral do aluno baseado nas parcelas.
      */
-private function calcularStatusGeral(Aluno $aluno): string
-{
-    $pagamentos = $aluno->pagamentos;
+    private function calcularStatusGeral(Aluno $aluno): string
+    {
+        $pagamentos = $aluno->pagamentos;
 
-    if ($pagamentos->isEmpty()) {
-        return 'Sem Parcelas Geradas';
+        if ($pagamentos->isEmpty()) {
+            return 'Sem Parcelas Geradas';
+        }
+
+        $hoje = now();
+
+        $atrasados = $pagamentos->filter(function ($p) use ($hoje) {
+            return $p->status === 'Pendente'
+                && Carbon::parse($p->data_vencimento)->lt($hoje);
+        })->count();
+
+        $pendentes = $pagamentos->filter(function ($p) use ($hoje) {
+            return $p->status === 'Pendente'
+                && Carbon::parse($p->data_vencimento)->gte($hoje);
+        })->count();
+
+        $pagos = $pagamentos->where('status', 'Pago')->count();
+
+        if ($atrasados > 0) {
+            return "Atrasado ({$atrasados})";
+        }
+
+        if ($pendentes > 0) {
+            return 'Em Curso (Pendente)';
+        }
+
+        if ($pagos === $pagamentos->count()) {
+            return 'Quitado (Pago)';
+        }
+
+        return 'Aguardando Pagamento';
     }
-
-    $hoje = now();
-
-    $atrasados = $pagamentos->filter(function ($p) use ($hoje) {
-        return $p->status === 'Pendente'
-            && Carbon::parse($p->data_vencimento)->lt($hoje);
-    })->count();
-
-    $pendentes = $pagamentos->filter(function ($p) use ($hoje) {
-        return $p->status === 'Pendente'
-            && Carbon::parse($p->data_vencimento)->gte($hoje);
-    })->count();
-
-    $pagos = $pagamentos->where('status', 'Pago')->count();
-
-    if ($atrasados > 0) {
-        return "Atrasado ({$atrasados})";
-    }
-
-    if ($pendentes > 0) {
-        return 'Em Curso (Pendente)';
-    }
-
-    if ($pagos === $pagamentos->count()) {
-        return 'Quitado (Pago)';
-    }
-
-    return 'Aguardando Pagamento';
-}
 
 
     // ... (fim da classe) ...
