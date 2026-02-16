@@ -138,7 +138,7 @@ class PagamentoController extends Controller
             $pagamento->data_pagamento = null;
             $pagamento->valor_pago = null;
             $pagamento->metodo_pagamento = null;
-            $pagamento->observacoes = $data['observacoes'];
+            $pagamento->observacoes = $data['observacoes'] ?? null;
 
             $pagamento->save();
             $message = 'Parcela ' . $pagamento->parcela_numero . ' cancelada.';

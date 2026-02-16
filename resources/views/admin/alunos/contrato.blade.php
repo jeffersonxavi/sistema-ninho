@@ -201,7 +201,7 @@
             Valor da Parcela: R$ {{ number_format($aluno->valor_parcela, 2, ',', '.') }}
         </div>
         3.2 - O pagamento da <strong>primeira parcela deverá ser realizado no ato de matrícula</strong>, necessária para sua efetivação.<br><br>
-        3.3 - A Matrícula e as Parcelas devem ser pagas por meio de <strong>cartão de débito/crédito, pix ou espécie</strong>. Após a escolha do meio de pagamento, serão enviados os dados necessários para a efetuação do pagamento para o contratante por meio do whatsapp e/ou e-mail eletrônico.<br><br>
+        3.3 - A Matrícula e as Parcelas devem ser pagas por meio de <strong>cartão de débito/crédito, pix, espécie ou boleto</strong>. Após a escolha do meio de pagamento, serão enviados os dados necessários para a efetuação do pagamento para o contratante por meio do whatsapp e/ou e-mail eletrônico.<br><br>
         3.3.1 - O pagamento realizado via maquininha implica ao CONTRATANTE o valor de <strong>todas as tarifas que envolvem a transação</strong>.<br><br>
         3.4 - Em caso de atraso no pagamento, o valor da parcela será acrescido de <strong>multa de 2% e mora diária de 0,33%</strong>.<br><br>
         3.5 - <strong>Planos de Pagamento com Vencimentos Prorrogados:</strong> A anuidade do reforço escolar é integralmente devida. Caso, por solicitação do CONTRATANTE, o vencimento de uma ou mais parcelas seja prorrogado para data posterior ao término do reforço escolar, as obrigações financeiras se estenderão até a data do vencimento da última parcela, independentemente de o término do reforço escolar ter ocorrido em data anterior, ficando o CONTRATANTE obrigado ao pagamento das parcelas ainda que tenham vencimento posterior ao encerramento do Curso.
