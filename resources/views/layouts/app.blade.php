@@ -7,7 +7,6 @@
 
         {{-- CORREÇÃO: Usando @yield('title') para o título da página. Garante que o nome do app seja o fallback. --}}
         <title>@yield('title', config('app.name', 'Sistema Ninho'))</title>
-
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
