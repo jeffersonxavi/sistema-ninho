@@ -15,57 +15,70 @@ class DashboardController extends Controller
     {
         $user = Auth::user();
         $isStaff = $user->role === 'staff';
+        $mesAtual = Carbon::now()->month;
 
-        // LÓGICA PARA STAFF / PROFESSOR
+        // --- LÓGICA COMPARTILHADA: Aniversariantes Staff ---
+        // Usamos join para acessar a data_nascimento na tabela users
+        $aniversariantesStaff = Professor::join('users', 'professores.user_id', '=', 'users.id')
+            ->select('professores.*', 'users.data_nascimento as dt_nasc') // Alias para facilitar
+            ->whereMonth('users.data_nascimento', $mesAtual)
+            ->orderByRaw('EXTRACT(DAY FROM users.data_nascimento) ASC')
+            ->with('user')
+            ->get();
+
+        // --- LÓGICA PARA STAFF / PROFESSOR ---
         if ($isStaff) {
             $professor = $user->professor;
             
-            // Se o usuário é staff mas não tem registro na tabela professores
             if (!$professor) {
                 return view('dashboard', [
                     'totalAlunos' => 0,
                     'totalTurmas' => 0,
-                    'proximosAniversarios' => collect(),
+                    'aniversariantesAlunos' => collect(),
+                    'aniversariantesStaff' => $aniversariantesStaff,
                     'isStaff' => true
                 ]);
             }
 
             $turmasIds = $professor->turmas()->pluck('turmas.id');
-            
             $totalAlunos = Aluno::whereIn('turma_id', $turmasIds)->count();
             $totalTurmas = $turmasIds->count();
             
-            // Aniversariantes do mês das turmas DESTE professor
-            $proximosAniversarios = Aluno::whereIn('turma_id', $turmasIds)
-                ->whereMonth('data_nascimento', Carbon::now()->month)
-                ->orderByRaw('EXTRACT(day FROM data_nascimento) ASC')
-                ->take(5)->get();
+            // Se Alunos também usarem a tabela Users, precisa de join aqui também.
+            // Se a data estiver na tabela alunos, mantemos assim:
+            $aniversariantesAlunos = Aluno::whereIn('turma_id', $turmasIds)
+                ->whereMonth('data_nascimento', $mesAtual)
+                ->orderByRaw('EXTRACT(DAY FROM data_nascimento) ASC')
+                ->get();
             
-            return view('dashboard', compact('totalAlunos', 'totalTurmas', 'proximosAniversarios', 'isStaff'));
+            return view('dashboard', compact('totalAlunos', 'totalTurmas', 'aniversariantesAlunos', 'aniversariantesStaff', 'isStaff'));
         }
 
-        // LÓGICA PARA ADMIN
+        // --- LÓGICA PARA ADMIN ---
         $totalAlunos = Aluno::count();
         $totalProfessores = Professor::count();
         
-        // Soma do valor_pago na tabela pagamentos
-        $faturamentoMes = Pagamento::whereMonth('data_pagamento', Carbon::now()->month)
+        $faturamentoMes = Pagamento::whereMonth('data_pagamento', $mesAtual)
             ->where('status', 'Pago')
             ->sum('valor_pago');
         
-        // Pagamentos vencidos (data_vencimento < hoje e status Pendente)
         $pendentes = Pagamento::where('status', 'Pendente')
             ->where('data_vencimento', '<', Carbon::now())
             ->count();
 
-        // Alunos matriculados recentemente
-$recentes = Aluno::with('turma.sala')->latest()->take(5)->get();
+        // Admin vê todos os alunos (PostgreSQL syntax)
+        $aniversariantesAlunos = Aluno::with('turma')
+            ->whereMonth('data_nascimento', $mesAtual)
+            ->orderByRaw('EXTRACT(DAY FROM data_nascimento) ASC')
+            ->get();
+
         return view('dashboard', compact(
             'totalAlunos', 
             'totalProfessores', 
             'faturamentoMes', 
             'pendentes', 
-            'recentes', 
+            'aniversariantesAlunos', 
+            'aniversariantesStaff', 
             'isStaff'
         ));
     }
