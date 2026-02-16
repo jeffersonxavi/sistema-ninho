@@ -12,11 +12,11 @@ class Professor extends Model
     use HasFactory;
     protected $table = 'professores'; // força o nome correto da tabela
 
-    // Campos que podem ser preenchidos em massa
     protected $fillable = [
         'nome',
-        'cadastrado_por_user_id',
         'user_id',
+        'cadastrado_por_user_id',
+        'chave_pix',
     ];
 
     public function turmas()

@@ -25,6 +25,10 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            //Novos campos aqui a serem validados e permitidos no fill()
+            'cpf' => ['nullable', 'string', 'max:14'], // Ex: 000.000.000-00
+            'telefone' => ['nullable', 'string', 'max:20'],
+            'data_nascimento' => ['nullable', 'date'],
         ];
     }
 }

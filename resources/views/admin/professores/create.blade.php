@@ -9,7 +9,12 @@
 @endsection
 
 @section('content')
-<div class="py-12" x-data="formValidation({{ isset($professor) ? json_encode($professor->user ?? []) : '{}' }})">
+<div class="py-12"
+     x-data="formValidation(
+        {{ isset($professor) ? json_encode($professor->user) : '{}' }},
+        {{ isset($professor) ? json_encode($professor) : '{}' }}
+     )">
+
     <div class="max-w-4xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200">
             <div class="p-8">
@@ -19,11 +24,11 @@
                         {{ isset($professor) ? 'Editar Dados do Professor' : 'Detalhes do Novo Professor' }}
                     </h3>
                     <p class="text-sm text-gray-500">
-                        O sistema validará os dados conforme você preenche.
+                        Campos marcados com <span class="text-red-500">*</span> são obrigatórios.
                     </p>
                 </div>
 
-                <form method="POST" 
+                <form method="POST"
                       action="{{ isset($professor) ? route('admin.professores.update', $professor) : route('admin.professores.store') }}"
                       @submit.prevent="submitForm">
                     @csrf
@@ -31,116 +36,170 @@
                         @method('PUT')
                     @endif
 
-                    <div class="space-y-6">
-                        {{-- Nome Completo --}}
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700">Nome Completo <span class="text-red-500">*</span></label>
-                            <input type="text" name="nome" x-model="fields.nome" required
-                                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border"
-                                   :class="errors.nome ? 'border-red-500' : 'border-gray-300'">
-                            <p x-show="errors.nome" class="text-red-500 text-xs mt-1" x-text="errors.nome"></p>
+                    <div class="space-y-8">
+
+                        {{-- ===================== --}}
+                        {{-- DADOS PESSOAIS        --}}
+                        {{-- ===================== --}}
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <h4 class="text-sm font-bold text-indigo-600 uppercase tracking-wider mb-6">
+                                Dados Pessoais
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {{-- Nome --}}
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-semibold text-gray-700">
+                                        Nome Completo <span class="text-red-500">*</span>
+                                    </label>
+                                    <input type="text" name="name" x-model="fields.name" required
+                                           class="mt-1 block w-full rounded-md shadow-sm sm:text-sm p-2.5 border"
+                                           :class="errors.name || {{ $errors->has('name') ? 'true' : 'false' }} ? 'border-red-500' : 'border-gray-300'">
+                                    @error('name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+
+                                {{-- CPF --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700">CPF</label>
+                                    <input type="text" name="cpf" x-model="fields.cpf" placeholder="000.000.000-00"
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm p-2.5 border">
+                                    @error('cpf') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+
+                                {{-- Telefone --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700">Telefone</label>
+                                    <input type="text" name="telefone" x-model="fields.telefone" placeholder="(00) 00000-0000"
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm p-2.5 border">
+                                    @error('telefone') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+
+                                {{-- Data de Nascimento --}}
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700">Data de Nascimento</label>
+                                    <input type="date" name="data_nascimento" x-model="fields.data_nascimento"
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm p-2.5 border">
+                                    @error('data_nascimento') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+                            </div>
                         </div>
 
-                        <hr class="border-gray-100">
-
-                        {{-- Seção de Acesso --}}
+                        {{-- ===================== --}}
+                        {{-- CREDENCIAIS           --}}
+                        {{-- ===================== --}}
                         <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
-                            <h4 class="text-sm font-bold text-indigo-600 uppercase tracking-wider mb-4">Credenciais de Acesso</h4>
-                            
+                            <h4 class="text-sm font-bold text-indigo-600 uppercase tracking-wider mb-6">
+                                Credenciais de Acesso
+                            </h4>
+
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 {{-- Email --}}
                                 <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-gray-700">Email Institucional</label>
-                                    <input type="email" name="email" x-model="fields.email" @blur="validateEmail"
-                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border"
-                                           placeholder="professor@escola.com">
+                                    <label class="block text-sm font-medium text-gray-700">Email Institucional <span class="text-red-500">*</span></label>
+                                    <input type="email" name="email" x-model="fields.email" @blur="validateEmail" required
+                                           class="mt-1 block w-full rounded-md shadow-sm sm:text-sm p-2.5 border"
+                                           :class="errors.email || {{ $errors->has('email') ? 'true' : 'false' }} ? 'border-red-500' : 'border-gray-300'">
                                     <p x-show="errors.email" class="text-red-500 text-xs mt-1" x-text="errors.email"></p>
+                                    @error('email') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                 </div>
 
                                 {{-- Senha --}}
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">
-                                        Senha
-                                        <span x-show="!isEditForm">(obrigatória)</span>
-                                        <span x-show="isEditForm">(deixe em branco para manter a senha atual)</span>
+                                        Senha 
+                                        <span class="text-xs text-gray-400" x-text="isEditForm ? '(deixe em branco para manter)' : '(mínimo 8 caracteres)'"></span>
                                     </label>
-                                    <div class="mt-1 relative">
-                                        <input :type="showPasswords ? 'text' : 'password'" name="password" 
-                                               x-model="fields.password" @input="validatePasswords"
-                                               class="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border pr-10">
-                                        
-                                        <button type="button" @click="showPasswords = !showPasswords" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400">
-                                            <template x-if="!showPasswords">
-                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                                            </template>
-                                            <template x-if="showPasswords">
-                                                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" /></svg>
-                                            </template>
-                                        </button>
-                                    </div>
-                                    {{-- Barra de força --}}
+                                    <input type="password" name="password" x-model="fields.password" @input="validatePasswords"
+                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm p-2.5 border">
+                                    
                                     <div class="mt-2 h-1 w-full bg-gray-200 rounded-full overflow-hidden">
-                                        <div class="h-full transition-all duration-500" 
-                                             :class="passwordStrengthColor" 
-                                             :style="`width: ${passwordStrengthWidth}%` text-align: right"></div>
+                                        <div class="h-full transition-all duration-500"
+                                             :class="passwordStrengthColor"
+                                             :style="`width: ${passwordStrengthWidth}%`">
+                                        </div>
                                     </div>
+                                    @error('password') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                                 </div>
 
                                 {{-- Confirmar Senha --}}
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700">Confirmar Senha</label>
-                                    <input :type="showPasswords ? 'text' : 'password'" name="password_confirmation" 
-                                           x-model="fields.password_confirmation" @input="validatePasswords"
-                                           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2.5 border"
+                                    <input type="password" name="password_confirmation" x-model="fields.password_confirmation" @input="validatePasswords"
+                                           class="mt-1 block w-full rounded-md shadow-sm sm:text-sm p-2.5 border"
                                            :class="errors.password_confirmation ? 'border-red-500' : 'border-gray-300'">
                                     <p x-show="errors.password_confirmation" class="text-red-500 text-xs mt-1" x-text="errors.password_confirmation"></p>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    {{-- Ações --}}
-                    <div class="flex items-center justify-end mt-10 gap-x-4">
-                        <a href="{{ route('admin.professores.index') }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">Cancelar</a>
-                        <button type="submit" 
-                                :disabled="hasErrors"
-                                class="rounded-md bg-indigo-600 px-8 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150">
-                            {{ isset($professor) ? 'Atualizar Professor' : 'Cadastrar Professor' }}
-                        </button>
+                        {{-- ===================== --}}
+                        {{-- DADOS FINANCEIROS     --}}
+                        {{-- ===================== --}}
+                        <div class="bg-gray-50 p-6 rounded-xl border border-gray-200">
+                            <h4 class="text-sm font-bold text-indigo-600 uppercase tracking-wider mb-6">
+                                Dados Financeiros
+                            </h4>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Chave PIX</label>
+                                <input type="text" name="chave_pix" x-model="fields.chave_pix" placeholder="CPF, Email, Telefone ou Aleatória"
+                                       class="mt-1 block w-full rounded-md border-gray-300 shadow-sm sm:text-sm p-2.5 border">
+                                @error('chave_pix') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+
+                        {{-- BOTÕES --}}
+                        <div class="flex items-center justify-end mt-10 gap-x-4">
+                            <a href="{{ route('admin.professores.index') }}" class="text-sm font-semibold text-gray-600 hover:text-gray-900">
+                                Cancelar
+                            </a>
+                            <button type="submit" :disabled="hasErrors"
+                                    class="rounded-md bg-indigo-600 px-8 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition duration-150">
+                                {{ isset($professor) ? 'Atualizar Professor' : 'Cadastrar Professor' }}
+                            </button>
+                        </div>
+
                     </div>
                 </form>
+
             </div>
         </div>
     </div>
 </div>
 
 <script>
-function formValidation(existingUser = {}) {
+function formValidation(existingUser = {}, existingProfessor = {}) {
     return {
-        showPasswords: false,
-        isEditForm: Object.keys(existingUser).length > 0,
+        // Verifica se é edição baseando-se na existência de um ID de usuário
+        isEditForm: !!(existingUser && existingUser.id),
+
         fields: {
-            nome: existingUser.name || '',
+            name: existingUser.name || '',
             email: existingUser.email || '',
+            cpf: existingUser.cpf || '',
+            telefone: existingUser.telefone || '',
+            // Garante formato YYYY-MM-DD para o input date
+            data_nascimento: existingUser.data_nascimento ? existingUser.data_nascimento.split('T')[0] : '',
+            chave_pix: existingProfessor.chave_pix || '',
             password: '',
             password_confirmation: ''
         },
+
         errors: {
-            nome: '',
+            name: '',
             email: '',
             password_confirmation: ''
         },
 
         validateEmail() {
-            const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            if (!this.fields.email) return;
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             this.errors.email = re.test(this.fields.email) ? '' : 'Insira um e-mail válido.';
         },
 
         validatePasswords() {
+            this.errors.password_confirmation = '';
             if (this.fields.password_confirmation && this.fields.password !== this.fields.password_confirmation) {
                 this.errors.password_confirmation = 'As senhas não coincidem.';
-            } else {
-                this.errors.password_confirmation = '';
             }
         },
 
@@ -156,11 +215,18 @@ function formValidation(existingUser = {}) {
         },
 
         get hasErrors() {
-            if (!this.fields.nome || this.fields.nome.length < 3) return true;
-            if (!this.fields.email) return true;
-            if (this.fields.password_confirmation && this.fields.password !== this.fields.password_confirmation) return true;
-            if (!this.isEditForm && this.fields.password.length < 8) return true;
-            return false;
+            // Se for novo, senha > 8 é obrigatória. Se for edição, só valida se digitar algo.
+            const passLength = this.fields.password.length;
+            const isPasswordInvalid = !this.isEditForm ? passLength < 8 : (passLength > 0 && passLength < 8);
+
+            return (
+                !this.fields.name || 
+                this.fields.name.length < 3 || 
+                !this.fields.email || 
+                !!this.errors.email || 
+                isPasswordInvalid || 
+                !!this.errors.password_confirmation
+            );
         },
 
         submitForm(e) {
