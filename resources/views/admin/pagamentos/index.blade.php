@@ -53,7 +53,7 @@
                     </div>
                     <div>
                         <p class="text-xs font-black text-indigo-400 uppercase tracking-widest">Quantidade</p>
-                        <p class="text-2xl font-black text-indigo-800">{{ number_format($totalParcelas, 0, '', '.') }} <span class="text-sm font-medium text-indigo-400">unid.</span></p>
+                        <p class="text-2xl font-black text-indigo-800">{{ number_format($totalParcelas, 0, '', '.') }} <span class="text-sm font-medium text-indigo-400">parcela(s).</span></p>
                     </div>
                 </div>
             </div>

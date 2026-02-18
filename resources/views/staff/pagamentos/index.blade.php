@@ -48,7 +48,7 @@
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase">Aluno</th>
                                     <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase">Parcela</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Valor Previsto</th>
+                                    {{-- <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase tracking-wider">Valor Previsto</th> --}}
                                     <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase">Vencimento</th>
                                     <th class="px-6 py-3 text-left text-xs font-bold text-indigo-700 uppercase">Status</th>
                                     <th class="px-6 py-3 text-center text-xs font-bold text-indigo-700 uppercase">Ações</th>
@@ -68,9 +68,9 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                                             {{ $pagamento->parcela_numero }}ª Parcela
                                         </td>
-                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-green-700 font-bold">
+                                         {{-- <td class="px-6 py-4 whitespace-nowrap text-sm text-green-700 font-bold">
                                             R$ {{ number_format($pagamento->valor_previsto, 2, ',', '.') }}
-                                        </td>
+                                        </td> --}}
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             <span class="{{ $estaAtrasado ? 'text-red-600 font-bold' : 'text-gray-600' }}">
                                                 {{ $vencimento->format('d/m/Y') }}
