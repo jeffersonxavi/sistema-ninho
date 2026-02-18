@@ -176,7 +176,7 @@
                                     <span class="ml-3 font-bold text-sm">Controle Financeiro</span>
                                 </a>
                             @endif
-                            <a href="{{ route('admin.salas.index') }}" class="flex items-center p-3 rounded-xl border border-gray-100 hover:bg-gray-800 hover:text-white group transition-all duration-200">
+                            <a href="{{ route('staff.salas.index') }}" class="flex items-center p-3 rounded-xl border border-gray-100 hover:bg-gray-800 hover:text-white group transition-all duration-200">
                                 <div class="p-2 bg-gray-50 rounded-lg group-hover:bg-gray-700 transition-colors text-gray-600 group-hover:text-white">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z"></path></svg>
                                 </div>

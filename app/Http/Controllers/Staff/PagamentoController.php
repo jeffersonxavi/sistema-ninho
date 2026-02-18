@@ -47,36 +47,27 @@ public function index(Request $request)
         return view('staff.pagamentos.show', compact('pagamento'));
     }
 
-    public function update(Request $request, Pagamento $pagamento)
-    {
-        $data = $request->validate([
-            'action' => ['required', 'string', 'in:pay,cancel,reopen'], 
-            'valor_pago' => ['nullable', 'numeric', 'min:0'],
-            'data_pagamento' => ['nullable', 'date'],
-            'metodo_pagamento' => ['nullable', 'string', 'max:50'],
-            'observacoes' => ['nullable', 'string', 'max:500'],
-        ]);
+   public function update(Request $request, Pagamento $pagamento)
+{
+    $data = $request->validate([
+        'action' => ['required', 'string', 'in:pay,cancel,reopen'], 
+        'observacoes' => ['nullable', 'string', 'max:500'],
+    ]);
 
-        $pagamento->registrado_por_user_id = Auth::id();
+    $pagamento->registrado_por_user_id = Auth::id();
 
-        if ($data['action'] === 'pay') {
-            $pagamento->status = 'Pago';
-            $pagamento->data_pagamento = $data['data_pagamento'] ?? Carbon::now();
-            $pagamento->valor_pago = $data['valor_pago'] ?? $pagamento->valor_previsto;
-            $pagamento->metodo_pagamento = $data['metodo_pagamento'];
-            $pagamento->observacoes = $data['observacoes'];
-            $message = 'Pagamento registrado com sucesso.';
-        } elseif ($data['action'] === 'cancel') {
-            $pagamento->status = 'Cancelado';
-            $message = 'Parcela cancelada.';
-        } elseif ($data['action'] === 'reopen') {
-            $pagamento->status = 'Pendente';
-            $message = 'Parcela reaberta.';
-        }
+    if ($data['action'] === 'pay') {
+        $pagamento->status = 'Pago';
+        $pagamento->data_pagamento = now(); // Data de hoje
+        $pagamento->valor_pago = $pagamento->valor_previsto; // Copia o valor interno do banco
+        $pagamento->metodo_pagamento = 'Dinheiro/Manual'; // Define um padrão
+        $pagamento->observacoes = $data['observacoes'];
+        $message = 'Baixa realizada com sucesso!';
+    } 
+    // ... manter lógica de cancel e reopen
+    
+    $pagamento->save();
 
-        $pagamento->save();
-
-        // REDIRECIONAMENTO CORRIGIDO PARA STAFF
-        return redirect()->route('staff.pagamentos.index', ['status' => $pagamento->status])->with('success', $message);
-    }
+    return redirect()->route('staff.pagamentos.index', ['status' => 'Pago'])->with('success', $message);
+}
 }
