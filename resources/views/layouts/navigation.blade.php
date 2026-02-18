@@ -45,10 +45,10 @@
                             Turmas & Salas
                         </x-nav-link>
 
-                        <x-nav-link :href="route('staff.alunos.index')" 
+                        {{-- <x-nav-link :href="route('staff.alunos.index')" 
                             :active="request()->routeIs('staff.alunos.*')">
                             Alunos
-                        </x-nav-link>
+                        </x-nav-link> --}}
 
                         <x-nav-link :href="route('staff.pagamentos.index')" 
                             :active="request()->routeIs('staff.pagamentos.*')">

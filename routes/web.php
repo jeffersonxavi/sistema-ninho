@@ -71,8 +71,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('salas', StaffSalaController::class)
                 ->parameters(['salas' => 'sala']);
 
-            Route::resource('alunos', StaffAlunoController::class)
-                ->parameters(['alunos' => 'aluno']);
+            /* Route::resource('alunos', StaffAlunoController::class)
+                ->parameters(['alunos' => 'aluno']); */
 
             Route::resource('pagamentos', PagamentoController::class)
                 ->parameters(['pagamentos' => 'pagamento']);
